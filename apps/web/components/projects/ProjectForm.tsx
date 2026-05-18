@@ -53,7 +53,7 @@ const BasicSchema = ProjectUpsertSchema.pick({
     targetIndustry: true,
     startedOn: true,
     isPublished: true,
-    url: false,
+    url: true,
     plan: true,
 });
 

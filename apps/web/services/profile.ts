@@ -56,9 +56,9 @@ export async function updateMyTags(token: string, tags: string[]) {
 //export async function getMyProfile(token: string) {
 //    return apiFetch<Profile>('/profile', { method: 'GET' }, token);
 //}
-//export async function upsertMyProfile(token: string, data: Partial<Profile>) {
-//    return apiFetch<Profile>('/profile', { method: 'PUT', body: JSON.stringify(data) }, token);
-//}
+export async function upsertMyProfile(token: string, data: Partial<Profile>) {
+    return apiFetch<Profile>('/profile', { method: 'PUT', body: JSON.stringify(data) }, token);
+}
 //export async function getProfileByUserId(userId: number) {
 //    return apiFetch<Profile>(`/profile/byUserId/${userId}`);
 //}

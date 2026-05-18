@@ -149,7 +149,7 @@ export default function TopNav({ variant }: { variant: Variant }) {
                     },
                 ]
                 : []),
-            { label: "My Network", href: "/myNetwork", icon: Network },
+            { label: "My Network", href: "/mynetwork", icon: Network },
         ];
     }, [isAuthed, hasProfile, user]);
 
