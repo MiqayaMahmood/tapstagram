@@ -1,0 +1,463 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProjectCategory {
+  DISTRIBUTIONS
+  eCOMMERCE
+  EDUCATION
+  ELECTRICAL_ELECTRONICS
+  FINANCE
+  FOOD_BEVREGES
+  HEALTHCARE
+  HOTEL_RESTAURANT
+  IMPORT_EXPORT
+  INDUSTRIAL_MACHINARY
+  MANUFACTURING
+  MARKETING
+  REAL_ESTATE
+  RETAIL
+  SALES
+  SERVICES
+  SOFTWARE
+  TRADING
+  OTHER
+}
+
+enum SocialPlatform {
+  WEBSITE
+  EMAIL
+  FACEBOOK
+  INSTAGRAM
+  X
+  TWITTER
+  LINKEDIN
+  YOUTUBE
+  TIKTOK
+  GITHUB
+  TELEGRAM
+  WHATSAPP
+  DRIBBLE
+  BEHANCE
+  REDDIT
+  TWITCH
+  OTHER
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  name          String?
+  email         String   @unique
+  password_hash String
+  is_business   Boolean  @default(false)
+  created_at    DateTime @default(now())
+
+  // 1:1 user→profile
+  profile Profile?
+
+  // bookmarks this user created (existing model)
+  bookmarks Bookmark[]
+
+  // profiles this user follows (back-rel to Follow.follower)
+  following       Follow[]
+  ProjectBookmark ProjectBookmark[]
+  ProjectFollow   ProjectFollow[]
+}
+
+model Profile {
+  id                  Int      @id @default(autoincrement())
+  userId              Int      @unique
+  user                User     @relation(fields: [userId], references: [id])
+  username            String?  @unique
+  name                String
+  title               String?
+  bio                 String?
+  profile_picture_url String?
+  hero_banner_url     String?
+  phone               String?
+  email               String?
+  location            String?
+  created_at          DateTime @default(now())
+
+  // Optional SEO slug for titles
+  titleSlug String? @unique @map("title_slug")
+
+  // Relations to other feature tables you already have
+  socialLinks     SocialLink[]
+  project         Project[]
+  bookmarkedBy    Bookmark[]
+  industry        String? // free text or picklist
+  session_id      String?           @db.VarChar(64)
+  utm_source      String?           @db.VarChar(128)
+  utm_medium      String?           @db.VarChar(128)
+  utm_campaign    String?           @db.VarChar(128)
+  utm_term        String?           @db.VarChar(128)
+  utm_content     String?           @db.VarChar(128)
+  referrer        String?
+  likes           MediaLike[]       @relation("media_likes_profile")
+  // people who follow THIS profile (back-rel to Follow.profile)
+  followers       Follow[]
+  media           Media[]
+  NfcCard         NfcCard?
+  ProfileView     ProfileView[]
+  SocialLinkClick SocialLinkClick[]
+
+  ProjectClick ProjectClick[]
+  visits       ProfileVisit[]
+  ProfileTags  ProfileTag[]
+  plan         String?        @default("")
+  Lead         Lead[]
+
+  profileClicksSent ProfileClick[] @relation("ProfileClickViewer")
+  profileClicksGot  ProfileClick[] @relation("ProfileClickTarget")
+
+  hasPremiumPresentation Boolean             @default(false)
+  presentation           ProfilePresentation?
+
+}
+
+model Tag {
+  id       Int          @id @default(autoincrement())
+  name     String       @unique
+  // reverse
+  profiles ProfileTag[]
+}
+
+model Follow {
+  id         Int      @id @default(autoincrement())
+  // User who follows
+  followerId Int      @map("follower_id")
+  follower   User     @relation(fields: [followerId], references: [id], onDelete: Cascade)
+  // Profile being followed
+  profileId  Int      @map("profile_id")
+  profile    Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@unique([followerId, profileId])
+  @@index([followerId])
+  @@index([profileId])
+  @@map("follow") // keep table name 'follow' if you prefer
+}
+
+model ProfileVisit {
+  id          Int      @id @default(autoincrement())
+  profileId   Int
+  sessionId   String // from cookie
+  source      String? // utm_source or ref
+  medium      String?
+  campaign    String?
+  referrer    String?
+  firstSeenAt DateTime @default(now())
+  profile     Profile  @relation(fields: [profileId], references: [id])
+
+  @@unique([profileId, sessionId]) // guarantees “only once per session per profile”
+}
+
+model ProfileView {
+  id        Int     @id @default(autoincrement())
+  profileId Int     @map("profile_id")
+  sessionId String? // from cookie
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  profile Profile @relation(fields: [profileId], references: [id])
+
+  @@index([profileId, createdAt])
+  @@map("profile_view")
+}
+
+model SocialLink {
+  id              Int               @id @default(autoincrement())
+  profileId       Int
+  profile         Profile           @relation(fields: [profileId], references: [id])
+  platform_name   String
+  label           String? // optional custom label (e.g., “Personal site”)
+  url             String
+  icon            String?
+  category        String?
+  sort_order      Int               @default(0)
+  SocialLinkClick SocialLinkClick[]
+}
+
+model Project {
+  id             Int             @id @default(autoincrement())
+  profileId      Int
+  profile        Profile         @relation(fields: [profileId], references: [id])
+  title          String
+  slug           String          @unique
+  category       ProjectCategory
+  targetIndustry String? // freeform; keep flexible
+  bio            String? // short teaser (1–2 sentences)
+  description    String? // detailed story: started, market, objectives, capacity, product idea, etc.
+  url            String?
+  // Address / Contact
+  addressLine1   String?
+  addressLine2   String?
+  city           String?
+  region         String?
+  postalCode     String?
+  country        String?
+  contactEmail   String?
+  contactPhone   String?
+  website        String? // primary site for the business
+  locationLat    Float?
+  locationLng    Float?
+
+  longDescription String? // detailed story: started, market, objectives, capacity, product idea, etc.
+
+  // Ops / display
+  startedOn       DateTime?
+  isPublished     Boolean             @default(false)
+  coverImageUrl   String?
+  socialLinks     ProjectSocialLink[]
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  sort_order      Int                 @default(0)
+  ProjectClick    ProjectClick[]
+  ProjectBookmark ProjectBookmark[]
+  ProjectFollow   ProjectFollow[]
+  ProjectView     ProjectView[]
+  ProjectTag      ProjectTag[]
+
+  hasPremiumPresentation Boolean             @default(false)
+  presentation           ProjectPresentation?
+}
+
+model ProjectSocialLink {
+  id                  Int      @id @default(autoincrement())
+  projectId  Int
+  project    Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  platform   SocialPlatform
+  label      String?
+  url        String
+  sort_order Int            @default(0)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@index([projectId])
+}
+
+model Bookmark {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  profileId Int
+  profile   Profile @relation(fields: [profileId], references: [id])
+
+  created_at DateTime @default(now())
+
+  @@unique([userId, profileId])
+}
+
+model NfcCard {
+  id Int @id @default(autoincrement())
+
+  // 1:1 with Profile — FK here and must be unique
+  profileId Int     @unique
+  profile   Profile @relation(fields: [profileId], references: [id])
+
+  chip_id    String   @unique
+  status     String   @default("active")
+  created_at DateTime @default(now())
+}
+
+model SocialLinkClick {
+  id           Int      @id @default(autoincrement())
+  profileId    Int      @map("profile_id")
+  socialLinkId Int      @map("social_link_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  profile    Profile    @relation(fields: [profileId], references: [id])
+  socialLink SocialLink @relation(fields: [socialLinkId], references: [id])
+
+  @@index([profileId, createdAt])
+  @@index([profileId, socialLinkId])
+  @@map("social_link_click")
+}
+
+model ProjectClick {
+  id        Int      @id @default(autoincrement())
+  profileId Int      @map("profile_id")
+  projectId Int      @map("project_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  kind      String?
+  referrer  String?
+  userAgent String?
+
+  profile Profile @relation(fields: [profileId], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([profileId, createdAt])
+  @@index([profileId, projectId])
+  @@map("project_click")
+}
+
+model Media {
+  id         String   @id @default(uuid()) @db.Char(36) // MySQL-friendly UUID
+  url        String
+  created_at DateTime @default(now())
+  owner_id   Int
+
+  owner Profile     @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  likes MediaLike[] @relation("media_likes_media")
+
+  @@index([owner_id])
+  @@map("media")
+}
+
+model MediaLike {
+  profileId  Int      @map("profile_id")
+  mediaId    String   @map("media_id") @db.Char(36)
+  created_at DateTime @default(now()) @map("created_at")
+
+  profile Profile @relation("media_likes_profile", fields: [profileId], references: [id], onDelete: Cascade)
+  media   Media   @relation("media_likes_media", fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@id([profileId, mediaId])
+  @@index([mediaId])
+  @@map("media_likes")
+}
+
+model ProjectBookmark {
+  userId    Int
+  projectId Int
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
+  @@index([projectId])
+}
+
+model ProjectFollow {
+  userId    Int
+  projectId Int
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, projectId])
+  @@index([projectId])
+}
+
+model Lead {
+  id           Int      @id @default(autoincrement())
+  profileId    Int      @map("profile_id")
+  firstName    String
+  lastName     String
+  contactEmail String
+  contactPhone String?
+  country      String?
+  message      String?
+  source       String? // web | nfc | qr
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  profile Profile @relation(fields: [profileId], references: [id])
+
+  @@index([profileId, createdAt])
+  @@map("lead")
+}
+
+model ProfileTag {
+  id        Int    @id @default(autoincrement())
+  profileId Int
+  tag       String @db.VarChar(100)
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Tag     Tag?    @relation(fields: [tagId], references: [id])
+  tagId   Int?
+
+  @@index([profileId], map: "profile_tag_profileId_idx")
+  @@index([tag], map: "profile_tag_tag_idx")
+  @@map("profile_tag")
+}
+
+model ProjectView {
+  id         Int      @id @default(autoincrement())
+  project_id Int
+  sessionId  String?  @db.VarChar(191)
+  created_at DateTime @default(now()) @db.DateTime(3)
+
+  project Project @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([project_id, created_at], map: "project_view_project_id_created_at_idx")
+  @@index([project_id, sessionId], map: "project_view_project_id_sessionId_idx")
+  @@map("project_view")
+}
+
+model ProfileClick {
+  id                Int      @id @default(autoincrement())
+  viewer_profile_id Int?
+  target_profile_id Int
+  created_at        DateTime @default(now()) @db.DateTime(3)
+  kind              String?  @db.VarChar(64)
+  referrer          String?  @db.VarChar(191)
+  userAgent         String?  @db.VarChar(191)
+
+  viewerProfile Profile? @relation("ProfileClickViewer", fields: [viewer_profile_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  targetProfile Profile  @relation("ProfileClickTarget", fields: [target_profile_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([target_profile_id, created_at], map: "profile_click_target_profile_id_created_at_idx")
+  @@index([viewer_profile_id, target_profile_id], map: "profile_click_viewer_profile_id_target_profile_id_idx")
+  @@map("profile_click")
+}
+
+model ProjectTag {
+  id        Int    @id @default(autoincrement())
+  projectId Int
+  tag       String @db.VarChar(100)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([projectId], map: "project_tag_projectId_idx")
+  @@index([tag], map: "project_tag_tag_idx")
+  @@map("project_tag")
+}
+
+model ProfilePresentation {
+  id              Int      @id @default(autoincrement())
+  profileId       Int      @unique
+  enabled         Boolean  @default(false)
+  status          String   @default("draft") // draft | published
+  template        String   @default("professional")
+  themeJson       Json?
+  contentJson     Json?
+  seoTitle        String?
+  seoDescription  String?
+  ogImageUrl      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  profile         Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([enabled, status])
+  @@map("profile_presentation")
+}
+
+model ProjectPresentation {
+  id              Int      @id @default(autoincrement())
+  projectId       Int      @unique
+  enabled         Boolean  @default(false)
+  status          String   @default("draft") // draft | published
+  template        String   @default("business")
+  themeJson       Json?
+  contentJson     Json?
+  seoTitle        String?
+  seoDescription  String?
+  ogImageUrl      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([enabled, status])
+  @@map("project_presentation")
+}

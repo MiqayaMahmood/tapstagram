@@ -1,0 +1,33 @@
+@"
+# dependencies
+node_modules/
+
+# build outputs
+.next/
+out/
+dist/
+build/
+.turbo/
+
+# env
+.env
+.env.local
+.env.production
+.env.*.local
+
+# vercel
+.vercel/
+
+# IDE / OS
+.vs/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
+
+# misc temp
+*.vsidx
+"@ | Set-Content .gitignore
