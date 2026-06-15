@@ -93,9 +93,7 @@ export async function upsertProfile(req: FastifyRequest<{ Body: UpsertProfileBod
 }
 
 //import type { FastifyReply, FastifyRequest } from "fastify";
-import {
-    normalizeUsername, validateUsername, usernameReasonToMessage, suggestUsernames
-} from "../utils/validate";
+import { normalizeUsername, validateUsername, usernameReasonToMessage, suggestUsernames } from "../utils/validate";
 import {
     findProfileByUsername, isUsernameTaken, updateProfileUsername, setProfileMediaUrl
 } from "../services/profile.service";

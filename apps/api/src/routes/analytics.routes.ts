@@ -1,13 +1,7 @@
 // src/routes/analytics.routes.ts
 import { FastifyInstance } from "fastify";
 import { z } from "zod";
-import {
-    recordProfileView,
-    recordSocialClick,
-    recordProjectClick,
-    dashboardSummary,
-} from "../controllers/analytics.controller";
-import { validateParams, validateBody } from "../utils/validate";
+
 
 const ProfileIdParams = z.object({ profileId: z.coerce.number().int().positive() });
 const SocialClickParams = z.object({ socialLinkId: z.coerce.number().int().positive() });
