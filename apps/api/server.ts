@@ -114,6 +114,21 @@ app.register(profileMediaRoutes);
 //app.register(profilePresentationRoutes);
 app.register(projectPresentationRoutes);
 
+app.get("/", async (_request, reply) => {
+    return reply.send({
+        status: "ok",
+        app: "Tapstagram API",
+        version: "1.0.0",
+    });
+});
+
+app.get("/health", async (_request, reply) => {
+    return reply.send({
+        healthy: true,
+        timestamp: new Date().toISOString(),
+    });
+});
+
 // Start server
 const start = async () => {
     try {
