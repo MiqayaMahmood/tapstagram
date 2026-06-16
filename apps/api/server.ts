@@ -62,9 +62,14 @@ if (!fs.existsSync(MEDIA_DIR)) fs.mkdirSync(MEDIA_DIR, { recursive: true });
 
 // Register plugins
 app.register(cors, {
-    origin: [/^https?:\/\/localhost:\d+$/, "https://tapstagram.com",
-                "http://localhost:3000",
-                "http://127.0.0.1:3000"], // adjust
+    origin: [
+        /^https?:\/\/localhost:\d+$/,
+        "https://tapstagram.com",
+        "https://www.tapstagram.com",
+        "https://tapstagram.vercel.app/",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000"], 
+
     methods: ["GET", "POST", "DELETE", "PATCH", "PUT", "OPTIONS"],
     allowedHeaders: ["content-type",
         "authorization",  // lower-case is safest for preflight

@@ -28,4 +28,7 @@ git push -u origin main --force
 git remote add origin https://github.com/MiqayaMahmood/tapstagram.git
 git push -u origin main --force
 
+buid the back end (api)
+PS E:\Miqaya\tapstagram\apps\api> npm run build
+
 
