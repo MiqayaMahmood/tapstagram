@@ -96,55 +96,5 @@ export default function ProfileHero({ profile }: { profile: P }) {
                 </div>
             </div>
         </div>
-        //<div className="border border-zinc-400 rounded-xl overflow-hidden bg-white">
-        //    {/* Cover */}
-        //    <div className="relative h-40 md:h-48 ">
-        //        {profile.hero_banner_url ? (
-        //            <img
-        //                src={profile.hero_banner_url}
-        //                alt=""
-        //                className="absolute inset-0 w-full h-full object-cover"
-        //            />
-        //        ) : (
-        //            <div className="absolute inset-0 hero-animated" /> // uses your gradient CSS from Hero
-        //        )}
-        //    </div>
-
-        //    {/* Header row */}
-        //    <div className="px-4 pb-4">
-        //        <div className="-mt-14 flex items-end gap-4 ">
-        //            {/* Avatar */}
-        //            <div className="shrink-0 z-10 h-28 w-28 overflow-hidden rounded-full border-4 border-white bg-zinc-100 shadow-md ring-1 ring-zinc-200">
-        //                {profile.profile_picture_url ? (
-        //                    <img
-        //                        src={profile.profile_picture_url}
-        //                        alt=""
-        //                        className="h-full w-full rounded-full object-cover border-4 border-white shadow"
-        //                    />
-        //                ) : (
-        //                        <div className="flex h-full w-full items-center justify-center bg-zinc-200 text-3xl font-semibold uppercase text-zinc-700" >
-        //                            {profile.name?.substring(0, 2) || "US"}
-        //                        </div>
-        //                )}
-        //            </div>
-
-        //            {/* Name and basics */}
-        //            <div className=" min-w-0 flex-1 z-10">
-        //                {profile.name && <h1 className="text-xl md:text-2xl font-bold truncate">{profile.name}</h1>}
-        //                {profile.title && <div className="text-zinc-900 pt-4 truncate">{profile.title}</div>}
-        //                {profile.location && <div className="text-lg text-zinc-900 truncate">{profile.location}</div>}
-        //                <div className="text-lg text-gray-700 mt-1">
-        //                    <b>{followers}</b> followers · <b>{following}</b> following
-        //                </div>
-        //            </div>
-
-        //            {/* Actions */}
-        //            <div className="flex items-center gap-2">
-        //                <ProfileFollowButton profileId={profile.id} initialFollowing={!!profile.followedByMe} />
-        //                <ProfileBookmarkButton profileId={profile.id} />
-        //            </div>
-        //        </div>
-        //    </div>
-        //</div>
     );
 }

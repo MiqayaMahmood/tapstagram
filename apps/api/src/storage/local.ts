@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { MediaStorage, UploadResult } from "./types";
 
 const MEDIA_DIR = path.join(process.cwd(), "media");
-const PUBLIC_BASE = process.env.PUBLIC_BASE_URL || "http://localhost:5000";
+const PUBLIC_BASE = process.env.PUBLIC_BASE_URL || "";
 
 if (!fs.existsSync(MEDIA_DIR)) fs.mkdirSync(MEDIA_DIR, { recursive: true });
 

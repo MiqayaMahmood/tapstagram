@@ -7,7 +7,7 @@ import path from "node:path";
 import { findProfileByUsername } from "../services/profile.service";
 
 
-const BASE = process.env.PUBLIC_BASE_URL || "http://localhost:5000";
+//const BASE = process.env.PUBLIC_BASE_URL || "http://localhost:5000";
 //const toPublic = (p?: string | null) => (p ? `${BASE}/media/${path.basename(p)}` : null);
 
 // Replace your ListQuery with a superset of the old filters + new sort/pagination

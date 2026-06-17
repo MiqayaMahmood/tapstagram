@@ -1,9 +1,9 @@
 // apps/api/src/routes/profile.me.routes.ts
 import { FastifyInstance } from "fastify";
-import path from "node:path";
+//import path from "node:path";
 
-const BASE = process.env.PUBLIC_BASE_URL || "http://localhost:5000";
-const toPublic = (p?: string | null) => (p ? `${BASE}/media/${path.basename(p)}` : null);
+//const BASE = process.env.PUBLIC_BASE_URL || "http://localhost:5000";
+//const toPPUBLIC_BASE_URLublic = (p?: string | null) => (p ? `${BASE}/media/${path.basename(p)}` : null);
 
 export async function profileMeRoutes(app: FastifyInstance) {
     app.get("/profiles/me", { preHandler: [app.authenticate] }, async (req, reply) => {
@@ -61,8 +61,8 @@ export async function profileMeRoutes(app: FastifyInstance) {
             name: profile.name,
             title: profile.title,
             bio: profile.bio ?? null,
-            profile_picture_url: toPublic(profile.profile_picture_url),
-            hero_banner_url: toPublic(profile.hero_banner_url),
+            profile_picture_url: profile.profile_picture_url,
+            hero_banner_url: profile.hero_banner_url,
             phone: profile.phone,
             email: profile.email,
             location: profile.location,

@@ -1,8 +1,8 @@
 import { FastifyPluginAsync } from "fastify";
-import path from "node:path";
+//import path from "node:path";
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-const toPublic = (p?: string | null) => (p ? `${BASE}/media/${path.basename(p)}` : null);
+//const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+//const toPublic = (p?: string | null) => (p ? `${BASE}/media/${path.basename(p)}` : null);
 
 const networkRoutes: FastifyPluginAsync = async (app) => {
     app.get("/network/me", { preHandler: [app.authenticate] }, async (req, reply) => {
@@ -117,33 +117,33 @@ const networkRoutes: FastifyPluginAsync = async (app) => {
         reply.send({
             followedProfiles: followedProfiles.map((x) => ({
                 ...x.profile,
-                profile_picture_url: toPublic(x.profile.profile_picture_url),
-                hero_banner_url: toPublic(x.profile.hero_banner_url),
+                profile_picture_url: (x.profile.profile_picture_url),
+                hero_banner_url: (x.profile.hero_banner_url),
                 followersCount: x.profile._count.followers,
             })),
 
             bookmarkedProfiles: bookmarkedProfiles.map((x) => ({
                 ...x.profile,
-                profile_picture_url: toPublic(x.profile.profile_picture_url),
-                hero_banner_url: toPublic(x.profile.hero_banner_url),
+                profile_picture_url: (x.profile.profile_picture_url),
+                hero_banner_url: (x.profile.hero_banner_url),
                 followersCount: x.profile._count.followers,
             })),
 
             followedProjects: followedProjects.map((x) => ({
                 ...x.project,
-                coverImageUrl: toPublic(x.project.coverImageUrl),
+                coverImageUrl: (x.project.coverImageUrl),
                 profile: {
                     ...x.project.profile,
-                    profile_picture_url: toPublic(x.project.profile.profile_picture_url),
+                    profile_picture_url: (x.project.profile.profile_picture_url),
                 },
             })),
 
             bookmarkedProjects: bookmarkedProjects.map((x) => ({
                 ...x.project,
-                coverImageUrl: toPublic(x.project.coverImageUrl),
+                coverImageUrl: (x.project.coverImageUrl),
                 profile: {
                     ...x.project.profile,
-                    profile_picture_url: toPublic(x.project.profile.profile_picture_url),
+                    profile_picture_url: (x.project.profile.profile_picture_url),
                 },
             })),
         });

@@ -36,7 +36,6 @@ export async function getDashboardSummary(token: string) {
     console.log("services/Analytics - Step - 1 : API_URL" + API_URL);
 
     const res = await fetch(`${API_URL}/analytics/dashboard/summary`, {
-    //const res = await fetch(`http://localhost:5000/analytics/dashboard/summary`, {
         headers: { Authorization: `Bearer ${token}` },
         cache: 'no-store',
     });
