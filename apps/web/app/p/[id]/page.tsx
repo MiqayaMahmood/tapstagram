@@ -101,22 +101,22 @@ export default async function PublicProfilePage({ params }: { params: { id: stri
             <ProfileAbout bio={p.bio} />
             <ProfileContact email={p.email} phone={p.phone} />
 
-            {/* Socials */}
+            {/* Socials 
             
-                <ProfileSocials profileId={p.id} links={p.socialLinks} />
-            
+            <ProfileSocials profileId={p.id} links={p.socialLinks} />
+            */}
             
 
-            {/* Projects */}
+            {/* Projects 
             <div className="border rounded-xl border-zinc-400 p-4 bg-white">
                 <h3 className="font-semibold mb-2">Projects</h3>
                 <ProfileProjects profileId={p.id} items={p.projectLinks} />
             </div>
-
-            {/* (Future) Recommendations go here */}
+            */}
+            {/* (Future) Recommendations go here 
             
             <PeopleSimilar profileId={p.id} />
-            
+            */}
         </ExplorerShell>
     );
 }

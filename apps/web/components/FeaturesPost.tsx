@@ -1,7 +1,7 @@
 'use client';
-const logo_url1 = "http://localhost:5000/media/Tap_Post_1.jpg";
-const logo_url2 = "http://localhost:5000/media/Tap_Post_2.jpg";
-const logo_url3 = "http://localhost:5000/media/Tap_Post_3.jpg";
+const logo_url1 = `${process.env.NEXT_PUBLIC_API_URL}/media/Tap_Post_1.jpg`;
+const logo_url2 = `${process.env.NEXT_PUBLIC_API_URL}/media/Tap_Post_2.jpg`;
+const logo_url3 = `${process.env.NEXT_PUBLIC_API_URL}/media/Tap_Post_3.jpg`;
 export default function SampleProfilesSection() {
     
 
