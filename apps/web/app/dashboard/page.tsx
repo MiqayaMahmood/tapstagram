@@ -310,8 +310,8 @@ export default function DashboardPage() {
                         <Features_OrderCards
                             isPremium={me?.plan === "premium"}
                             partners={[
-                                { name: "Salpers", href: "https://salpers.ch", logoUrl: `${process.env.NEXT_PUBLIC_API_URL}//media/salpers_logo.png` },
-                                { name: "Miqaya", href: "https://miqaya.ch", logoUrl: `${process.env.NEXT_PUBLIC_API_URL}//media/miqaya_logo.png` },
+                                { name: "Salpers", href: "https://salpers.ch", logoUrl: `${process.env.NEXT_PUBLIC_API_URL}/media/salpers_logo.png` },
+                                { name: "Miqaya", href: "https://miqaya.ch", logoUrl: `${process.env.NEXT_PUBLIC_API_URL}/media/miqaya_logo.png` },
                             ] as Partner[]}
                             onUpgrade={() => router.push("/billing/upgrade")}
                             onManage={() => router.push("/billing")}
