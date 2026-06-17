@@ -1,5 +1,5 @@
 import Link from "next/link";
-const logo_url = "http://localhost:5000/media/Tapstagram_logo.jpg";
+const logo_url = `${process.env.NEXT_PUBLIC_API_URL}/media/Tapstagram_logo.jpg`;
 
 export default function NfcCardPage() {
     return (

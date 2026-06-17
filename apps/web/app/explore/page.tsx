@@ -405,8 +405,8 @@ export default function ExplorePage() {
                         <Features_OrderCards
                             isPremium={me?.plan === "premium"}
                             partners={[
-                                { name: "Salpers", href: "https://salpers.ch", logoUrl: "http://localhost:5000/media/salpers_logo.png" },
-                                { name: "Miqaya", href: "https://miqaya.ch", logoUrl: "http://localhost:5000/media/miqaya_logo.png" },
+                                { name: "Salpers", href: "https://salpers.ch", logoUrl: `${process.env.NEXT_PUBLIC_API_URL}//media/salpers_logo.png` },
+                                { name: "Miqaya", href: "https://miqaya.ch", logoUrl: `${process.env.NEXT_PUBLIC_API_URL}//media/miqaya_logo.png` },
                             ] as Partner[]}
                             onUpgrade={() => router.push("/subscription")}
                             onManage={() => router.push("/subscription")}
