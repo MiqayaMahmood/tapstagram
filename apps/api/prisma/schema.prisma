@@ -67,6 +67,7 @@ model User {
   following       Follow[]
   ProjectBookmark ProjectBookmark[]
   ProjectFollow   ProjectFollow[]
+  @@map("user")
 }
 
 model Profile {
@@ -118,7 +119,7 @@ model Profile {
 
   hasPremiumPresentation Boolean             @default(false)
   presentation           ProfilePresentation?
-
+  @@map("profile")
 }
 
 model Tag {
@@ -156,6 +157,7 @@ model ProfileVisit {
   profile     Profile  @relation(fields: [profileId], references: [id])
 
   @@unique([profileId, sessionId]) // guarantees “only once per session per profile”
+  @@map("profilevisit")
 }
 
 model ProfileView {
@@ -182,6 +184,7 @@ model SocialLink {
   category        String?
   sort_order      Int               @default(0)
   SocialLinkClick SocialLinkClick[]
+  @@map("sociallink")
 }
 
 model Project {
@@ -226,6 +229,7 @@ model Project {
 
   hasPremiumPresentation Boolean             @default(false)
   presentation           ProjectPresentation?
+  @@map("project")
 }
 
 model ProjectSocialLink {
@@ -240,6 +244,7 @@ model ProjectSocialLink {
   updatedAt  DateTime       @updatedAt
 
   @@index([projectId])
+  @@map("projectsociallink")
 }
 
 model Bookmark {
@@ -254,6 +259,7 @@ model Bookmark {
   created_at DateTime @default(now())
 
   @@unique([userId, profileId])
+  @@map("bookmark")
 }
 
 model NfcCard {
@@ -266,6 +272,7 @@ model NfcCard {
   chip_id    String   @unique
   status     String   @default("active")
   created_at DateTime @default(now())
+  @@map("nfccard")
 }
 
 model SocialLinkClick {
@@ -335,6 +342,7 @@ model ProjectBookmark {
 
   @@unique([userId, projectId])
   @@index([projectId])
+  @@map("projectbookmark")
 }
 
 model ProjectFollow {
@@ -346,6 +354,7 @@ model ProjectFollow {
 
   @@id([userId, projectId])
   @@index([projectId])
+  @@map("projectfollow")
 }
 
 model Lead {
