@@ -16,6 +16,8 @@ import MarkdownPreviewCard from "@/components/markdown/MarkdownPreviewCard"; // 
 import ProjectRightRail from '@/components/recommendations/ProjectRightRail';
 
 import ProjectHero from '@/components/projects/ProjectHero';
+import ProjectOpenForChips from "@/components/projects/ProjectOpenForChips";
+import { normalizeProjectOpenFor } from "@/lib/project-open-for";
 
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +33,7 @@ import {
     Share2,
     MessageCircleMore,
     Send,
+    Handshake,
 } from "lucide-react";
 
 type ProjectViewData = any;
@@ -121,7 +124,10 @@ export default function ProjectView({ project }: { project: ProjectViewData}) {
     coverImageUrl,
     socialLinks = [],
     tags = [],
+    openFor,
+    collaborationNote,
     } = project;
+const openForValues = normalizeProjectOpenFor(openFor);
 const [stats, setStats] = useState<{ visits: number; siteClicks: number; social: { platform: string; count: number }[] } | null>(null);
 
 useEffect(() => {
@@ -189,14 +195,14 @@ useEffect(() => {
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
           <div>
               {/* Back + breadcrumbs */}
-              <div className="mb-4 flex items-center justify-between rounded-2xl border border-zinc-400 bg-white px-4 py-2 shadow-sm">
+              <div className="mb-4 flex flex-col gap-3 rounded-3xl border border-blue-100 bg-white/90 px-4 py-3 shadow-sm shadow-blue-950/5 backdrop-blur sm:flex-row sm:items-center sm:justify-between">
                   <div className="gap-4">
                       <Button onClick={onBack} className="items-center rounded-xl hover:bg-zinc-500">
                       <ArrowLeft className="mr-2 h-4 w-4" />
                       Back
                   </Button>
                   {(token && project.profileId === user?.profileId) && (
-                      <Link className="rounded-xl border align-left border border-zinc-400 ml-4 px-2 py-3 hover:bg-zinc-200"
+                      <Link className="ml-2 inline-flex rounded-2xl border border-blue-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-blue-50"
                           key={project.id}
                           href={`/dashboard/projects/${project.id}?profileId=${project.profileId}&plan=${plan}`}
                           
@@ -229,9 +235,9 @@ useEffect(() => {
               {/* top header */}
               <ProjectHero project={project} />
               {/* SOCIAL LINKS */}
-              <Card className="mt-4 rounded-2xl border border-zinc-200 shadow-sm">
+              <Card className="mt-4 rounded-3xl border border-blue-100 shadow-sm shadow-blue-950/5">
                   <CardHeader className="pb-3">
-                      <CardTitle className="flex items-center gap-2 text-lg">
+                      <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-fuchsia-100 text-fuchsia-700">
                               <Share2 className="h-5 w-5" />
                           </div>
@@ -267,14 +273,34 @@ useEffect(() => {
                       )}
                   </CardContent>
               </Card>
+              {(openForValues.length > 0 || collaborationNote) ? (
+                  <Card className="mt-4 rounded-3xl border border-blue-100 shadow-sm shadow-blue-950/5">
+                      <CardHeader className="pb-3">
+                          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
+                                  <Handshake className="h-5 w-5" />
+                              </div>
+                              Open For
+                          </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                          {openForValues.length > 0 ? (
+                              <ProjectOpenForChips openFor={openForValues} />
+                          ) : null}
+                          {collaborationNote ? (
+                              <p className="text-sm leading-6 text-slate-600">{collaborationNote}</p>
+                          ) : null}
+                      </CardContent>
+                  </Card>
+              ) : null}
               {/* TWO-COLUMN CONTENT AREA */}
               <div className="mt-4 grid gap-4 lg:grid-cols-2">
                   {/* Column A */}
                   <div className="space-y-4">
                       {/* STORY */}
-                      <Card className="rounded-2xl border border-zinc-200 shadow-sm">
+                      <Card className="rounded-3xl border border-blue-100 shadow-sm shadow-blue-950/5">
                           <CardHeader className="pb-3">
-                              <CardTitle className="flex items-center gap-2 text-lg">
+                              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
                                       <BookOpen className="h-5 w-5" />
                                   </div>
@@ -295,9 +321,9 @@ useEffect(() => {
                       </Card>
 
                       {/* OVERVIEW */}
-                      <Card className="rounded-2xl border border-zinc-200 shadow-sm">
+                      <Card className="rounded-3xl border border-blue-100 shadow-sm shadow-blue-950/5">
                           <CardHeader className="pb-3">
-                              <CardTitle className="flex items-center gap-2 text-lg">
+                              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-100 text-sky-700">
                                       <LayoutGrid className="h-5 w-5" />
                                   </div>
@@ -329,9 +355,9 @@ useEffect(() => {
 
                   {/* Column B */}
                   <div className="space-y-4">
-                      <Card className="rounded-2xl border border-zinc-200 shadow-sm">
+                      <Card className="rounded-3xl border border-blue-100 shadow-sm shadow-blue-950/5">
                           <CardHeader className="pb-3">
-                              <CardTitle className="flex items-center gap-2 text-lg">
+                              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
                                       <MapPin className="h-5 w-5" />
                                   </div>
@@ -419,7 +445,7 @@ useEffect(() => {
               
 
               {/* CONTACT CTA */}
-              <div className="mt-6 flex flex-col items-start justify-between gap-4 rounded-2xl border border-zinc-400 bg-gradient-to-tr from-zinc-50 to-white p-5 shadow-sm sm:flex-row sm:items-center">
+              <div className="mt-6 flex flex-col items-start justify-between gap-4 rounded-3xl border border-blue-100 bg-gradient-to-tr from-blue-50 via-white to-cyan-50/40 p-5 shadow-sm shadow-blue-950/5 sm:flex-row sm:items-center">
                   <div className="flex items-start gap-3">
                       <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
                           <MessageCircleMore className="h-5 w-5" />
@@ -571,5 +597,3 @@ useEffect(() => {
     </div>
   );
 }
-
-

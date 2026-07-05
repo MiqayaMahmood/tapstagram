@@ -95,9 +95,9 @@ export default function MyNetworkClient() {
         >
 
             <div className="space-y-3">
-                <div className="rounded-2xl border border-zinc-300 bg-white p-5 shadow-sm">
-                    <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">My Network</h1>
-                    <p className="mt-1 text-sm text-zinc-500">
+                <div className="rounded-3xl border border-blue-100 bg-white/95 p-5 shadow-sm shadow-blue-950/5">
+                    <h1 className="text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">My Network</h1>
+                    <p className="mt-1 text-sm leading-6 text-slate-500">
                         Manage the people and projects you follow, save, and revisit.
                     </p>
                 </div>
@@ -155,9 +155,9 @@ export default function MyNetworkClient() {
                     )}
                 />
 
-                <div className="rounded-2xl border border-zinc-300 bg-white p-5 shadow-sm">
+                <div className="rounded-3xl border border-blue-100 bg-white/95 p-5 shadow-sm shadow-blue-950/5">
                     {user?.profileId ? (
-                        <div id="leads" className="rounded-2xl border border-zinc-300 bg-white p-4 shadow-sm">
+                        <div id="leads" className="rounded-3xl border border-blue-100 bg-white p-4 shadow-sm shadow-blue-950/5">
                             <div className="mb-3 text-sm font-semibold text-zinc-900">Leads</div>
                             <ProfileLeads profileId={user.profileId} />
                         </div>
@@ -172,13 +172,13 @@ function ProfileMiniCard({ item }: any) {
     return (
         <Link
             href={`/p/${item.id}`}
-            className="flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-50/30 p-3 shadow-sm transition hover:bg-zinc-50"
+            className="flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/40 p-3 shadow-sm shadow-blue-950/5 transition hover:-translate-y-0.5 hover:bg-white"
         >
-            <div className="h-12 w-12 overflow-hidden rounded-full bg-zinc-100">
+            <div className="h-12 w-12 overflow-hidden rounded-full bg-blue-50 ring-1 ring-blue-100">
                 {item.profile_picture_url ? (
                     <img src={item.profile_picture_url} alt={item.name} className="h-full w-full object-cover" />
                 ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-zinc-200 text-sm font-semibold uppercase text-zinc-700">
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-50 text-sm font-semibold uppercase text-blue-700">
                         {item.name?.charAt(0) || "U"}
                     </div>
                 )}
@@ -197,13 +197,13 @@ function ProjectMiniCard({ item }: any) {
     return (
         <Link
             href={`/projects/${item.id}`}
-            className="flex gap-3 rounded-xl border border-emerald-200 bg-emerald-50/30 p-3 shadow-sm transition hover:bg-zinc-50"
+            className="flex gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/40 p-3 shadow-sm shadow-emerald-950/5 transition hover:-translate-y-0.5 hover:bg-white"
         >
-            <div className="h-14 w-14 overflow-hidden rounded-xl bg-zinc-100 shrink-0">
+            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-emerald-50 ring-1 ring-emerald-100">
                 {item.coverImageUrl ? (
                     <img src={item.coverImageUrl} alt={item.title} className="h-full w-full object-cover" />
                 ) : (
-                    <div className="h-full w-full bg-zinc-200" />
+                    <div className="h-full w-full bg-gradient-to-br from-slate-900 via-blue-700 to-emerald-400" />
                 )}
             </div>
 

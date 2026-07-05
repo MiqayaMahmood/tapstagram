@@ -48,6 +48,9 @@ export type ProjectLite = {
     country?: string | null;
     startedOn?: string | null;
     updatedAt?: string | null;
+    status?: string | null;
+    openFor?: unknown;
+    collaborationNote?: string | null;
     url?: string | null;
     profileId: number;
 };
@@ -92,6 +95,9 @@ export type Project = {
 
     createdAt?: string;
     updatedAt?: string;
+    status?: string | null;
+    openFor?: unknown;
+    collaborationNote?: string | null;
     // Back-compat fields (if server still returns snake_case)
     created_at?: string;
     updated_at?: string;
@@ -138,6 +144,9 @@ function normalizeProject(p: any): Project {
 
         createdAt: p.createdAt ?? p.created_at,
         updatedAt: p.updatedAt ?? p.updated_at,
+        status: p.status ?? null,
+        openFor: p.openFor ?? p.open_for ?? [],
+        collaborationNote: p.collaborationNote ?? p.collaboration_note ?? null,
 
         created_at: p.created_at, // keep for old callers if any
         updated_at: p.updated_at,

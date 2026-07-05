@@ -64,7 +64,7 @@ export default function MyQuickLinks() {
             </section>
 
             <Button asChild variant="outline" className="w-full">
-                <Link href="/myNetwork">View all</Link>
+                <Link href="/mynetwork">View all</Link>
             </Button>
         </div>
     );

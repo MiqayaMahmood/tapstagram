@@ -20,12 +20,16 @@ export const buttonVariants = ({
     className = "",
 }: Partial<ButtonProps> & { className?: string }) =>
     cn(
-        "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none disabled:opacity-50 disabled:pointer-events-none",
-        variant === "default" && "bg-neutral-900 text-white hover:bg-neutral-800",
-        variant === "outline" && "border border-neutral-200 hover:bg-neutral-50",
-        variant === "link" && "underline-offset-4 hover:underline",
-        size === "default" && "h-12 px-4 py-2",
-        size === "icon" && "h-12 w-10 p-0",
+        "inline-flex items-center justify-center gap-2 rounded-2xl text-sm font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30 disabled:pointer-events-none disabled:opacity-50",
+        variant === "default" && "bg-blue-700 text-white shadow-sm shadow-blue-950/15 hover:-translate-y-0.5 hover:bg-blue-800",
+        variant === "outline" && "border border-blue-100 bg-white text-slate-800 shadow-sm hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50/50",
+        variant === "ghost" && "text-slate-700 hover:bg-slate-100 hover:text-slate-950",
+        variant === "link" && "text-slate-900 underline-offset-4 hover:underline",
+        variant === "destructive" && "bg-red-600 text-white shadow-sm hover:bg-red-700",
+        size === "default" && "h-11 px-4 py-2",
+        size === "sm" && "h-9 rounded-xl px-3",
+        size === "lg" && "h-12 px-5",
+        size === "icon" && "h-10 w-10 p-0",
         className
     );
 

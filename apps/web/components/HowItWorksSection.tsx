@@ -7,10 +7,10 @@ export default function HowItWorksSection() {
         { step: '03', title: 'Get Your NFC Card', desc: 'Order your Tapstagram NFC card and connect it to your digital identity.' },
         { step: '04', title: 'Tap, Share, and Track', desc: 'Grow connections and measure visits, clicks, and leads over time.' },
     ];
-    const post_1 = "http://localhost:5000/media/Tap_Step_1.jpg";
-    const post_2 = "http://localhost:5000/media/Tap_Step_2.jpg";
-    const post_3 = "http://localhost:5000/media/Tap_Step_3.jpg";
-    const post_4 = "http://localhost:5000/media/Tap_Step_4.jpg";
+    const post_1 = `${process.env.NEXT_PUBLIC_API_URL}/media/Tap_Step_1.jpg`;
+    const post_2 = `${process.env.NEXT_PUBLIC_API_URL}/media/Tap_Step_2.jpg`;
+    const post_3 = `${process.env.NEXT_PUBLIC_API_URL}/media/Tap_Step_3.jpg`;
+    const post_4 = `${process.env.NEXT_PUBLIC_API_URL}/media/Tap_Step_4.jpg`;
     return (
         <section id="howitworks" className="bg-zinc-100 px-6 py-20">
             <div className="mx-auto max-w-7xl">

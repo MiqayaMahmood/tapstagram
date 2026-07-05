@@ -201,12 +201,12 @@ export default function SocialLinksManager({ profileId: propProfileId }: { profi
             {profileId && (
                 <>
                     {/* Add form */}
-                    <div className="grid grid-cols-1 md:grid-cols-6 gap-2 max-w-4xl items-center">
+                    <div className="grid max-w-4xl grid-cols-1 gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-3 md:grid-cols-6 md:items-end">
                         <label className="md:col-span-2">
-                            <span className="text-xs text-gray-600">Platform</span>
+                            <span className="text-xs font-medium text-slate-600">Platform</span>
                             <div className="relative">
                                 <select
-                                    className="border p-2 rounded w-full appearance-none pr-8"
+                                    className="min-h-11 w-full appearance-none rounded-2xl border border-slate-200 bg-white p-2.5 pr-8 text-sm text-slate-800 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                                     value={draftPlatform}
                                     onChange={(e) => {
                                         const key = e.target.value as PlatformKey;
@@ -224,9 +224,9 @@ export default function SocialLinksManager({ profileId: propProfileId }: { profi
                         </label>
 
                         <label className="md:col-span-3">
-                            <span className="text-xs text-gray-600">URL / handle</span>
+                            <span className="text-xs font-medium text-slate-600">URL / handle</span>
                             <input
-                                className="border p-2 rounded w-full"
+                                className="min-h-11 w-full rounded-2xl border border-slate-200 bg-white p-2.5 text-sm text-slate-800 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                                 placeholder={findPlatform(draftPlatform)?.placeholder || "https://"}
                                 value={draftUrl}
                                 onChange={(e) => setDraftUrl(e.target.value)}
@@ -234,7 +234,7 @@ export default function SocialLinksManager({ profileId: propProfileId }: { profi
                         </label>
 
                         <button
-                            className="rounded-xl bg-zinc-900 px-4 py-2 items-center text-sm font-medium text-white transition hover:bg-zinc-700 disabled:opacity-60"
+                            className="min-h-11 rounded-2xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-60"
                             onClick={add}
                             disabled={saving || !draftUrl}
                         >
@@ -246,7 +246,7 @@ export default function SocialLinksManager({ profileId: propProfileId }: { profi
                     {loading ? (
                         <div className="text-sm  bg-white text-gray-500">Loading…</div>
                     ) : items.length === 0 ? (
-                        <div className="rounded  bg-white border p-4 text-sm text-gray-600">
+                        <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-4 text-sm text-slate-600">
                             No social links yet—add your first one!
                         </div>
                     ) : (
@@ -256,20 +256,20 @@ export default function SocialLinksManager({ profileId: propProfileId }: { profi
                                 const platform = findPlatform(iconKey);
                                 const P = platform.icon
                                 return (
-                                    <li key={i.id} className="border p-2  bg-white rounded flex items-center justify-between">
+                                    <li key={i.id} className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
                                         <div className="min-w-0 flex items-center gap-2">
-                                            <P size={18} className="text-gray-700 shrink-0" />
+                                            <P size={18} className="shrink-0 text-slate-700" />
                                             <div className="min-w-0">
-                                                <div className="truncate font-medium">{i.platform_name}</div>
-                                                <a className="underline text-blue-600 text-sm truncate" href={i.url} target="_blank" rel="noreferrer">
+                                                <div className="truncate font-semibold text-slate-900">{i.platform_name}</div>
+                                                <a className="block truncate text-sm text-blue-600 hover:underline" href={i.url} target="_blank" rel="noreferrer">
                                                     {i.url}
                                                 </a>
                                             </div>
                                         </div>
-                                        <div className="flex gap-2">
+                                        <div className="grid grid-cols-3 gap-2 sm:flex">
                                             <button className="px-2 py-1 border rounded" onClick={() => move(i.id, -1)} title="Move up">↑</button>
                                             <button className="px-2 py-1 border rounded" onClick={() => move(i.id, 1)} title="Move down">↓</button>
-                                            <button className="px-2 py-1 border rounded text-red-600" onClick={() => del(i.id)} title="Delete">
+                                            <button className="rounded-xl border border-red-200 px-3 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50" onClick={() => del(i.id)} title="Delete">
                                                 Delete
                                             </button>
                                         </div>

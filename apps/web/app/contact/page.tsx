@@ -149,10 +149,10 @@ export default function ContactPage() {
     };
 
     return (
-        <div className="mx-auto max-w-7xl px-4 py-1">
+        <div className="mx-auto max-w-7xl px-0 py-4 sm:py-6">
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
                 <div>
-                    <div className="bg-white rounded-xl border-zinc-400 border bg-white p-4 flex mb-2 items-center justify-between">
+                    <div className="mb-3 flex items-center justify-between rounded-3xl border border-slate-200 bg-white/90 p-3 shadow-sm shadow-slate-950/5 backdrop-blur">
 
                         <Button onClick={onBack} className="inline-flex items-center">
                             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -161,9 +161,9 @@ export default function ContactPage() {
 
                     </div>
 
-                    <div className="rounded-xl border border-zinc-400 bg-white p-6 shadow-sm">
+                    <div className="rounded-3xl border border-slate-200 bg-white/95 p-5 shadow-sm shadow-slate-950/5 sm:p-6">
                         <div className="mb-6 flex items-start gap-3">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-700 ring-1 ring-blue-100">
                                 <Send className="h-5 w-5" />
                             </div>
 
@@ -171,7 +171,7 @@ export default function ContactPage() {
                                 <h1 className="text-2xl font-semibold text-neutral-900">
                                     Contact Tapstagram
                                 </h1>
-                                <p className="mt-1 text-sm text-neutral-500">
+                                <p className="mt-1 text-sm leading-6 text-neutral-500">
                                     Send us your question, inquiry, partnership interest, or premium request.
                                 </p>
                             </div>
@@ -187,7 +187,7 @@ export default function ContactPage() {
                                     <input
                                         required
                                         placeholder="Your full name"
-                                        className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                        className="min-h-11 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                         value={form.name}
                                         onChange={(e) => update('name', e.target.value)}
                                     />
@@ -202,7 +202,7 @@ export default function ContactPage() {
                                         required
                                         type="email"
                                         placeholder="name@company.com"
-                                        className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                        className="min-h-11 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                         value={form.email}
                                         onChange={(e) => update('email', e.target.value)}
                                     />
@@ -216,7 +216,7 @@ export default function ContactPage() {
                                     </label>
                                     <input
                                         placeholder="+41 77 777 77 77"
-                                        className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                        className="min-h-11 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                         value={form.phone}
                                         onChange={(e) => update('phone', e.target.value)}
                                     />
@@ -228,7 +228,7 @@ export default function ContactPage() {
                                     </label>
                                     <input
                                         placeholder="Country"
-                                        className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                        className="min-h-11 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                         value={form.country}
                                         onChange={(e) => update('country', e.target.value)}
                                     />
@@ -250,8 +250,8 @@ export default function ContactPage() {
                                                 type="button"
                                                 onClick={() => update('reason', reason)}
                                                 className={`rounded-2xl border px-4 py-3 text-left text-sm transition ${active
-                                                        ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm'
-                                                        : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50'
+                                                ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm'
+                                                : 'border-slate-200 bg-white text-slate-700 shadow-sm hover:-translate-y-0.5 hover:bg-slate-50'
                                                     }`}
                                             >
                                                 {reason}
@@ -270,7 +270,7 @@ export default function ContactPage() {
                                     required
                                     rows={6}
                                     placeholder="Tell us how we can help."
-                                    className="w-full rounded-xl border border-zinc-300 px-3 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                    className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                     value={form.message}
                                     onChange={(e) => update('message', e.target.value)}
                                 />
@@ -278,7 +278,7 @@ export default function ContactPage() {
 
                             <input type="hidden" value={form.profileId} readOnly />
 
-                            <div className="flex items-center justify-between gap-3 pt-2">
+                            <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
                                 <div className="text-sm text-zinc-500">
                                     We usually reply as soon as possible.
                                 </div>
@@ -286,7 +286,7 @@ export default function ContactPage() {
                                 <button
                                     disabled={sending || !canSubmit}
                                     type="submit"
-                                    className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                                    className="min-h-11 rounded-2xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                     {sending ? 'Sending…' : 'Send message'}
                                 </button>
@@ -302,7 +302,7 @@ export default function ContactPage() {
                 </div>
 
                 <aside className="space-y-4">
-                    <div className="rounded-xl border border-zinc-400 bg-white p-5 shadow-sm">
+                    <div className="rounded-3xl border border-slate-200 bg-white/95 p-5 shadow-sm shadow-slate-950/5">
                         <h2 className="text-base font-semibold text-zinc-900">Contact topics</h2>
                         <div className="mt-3 space-y-2 text-sm text-zinc-600">
                             <div>Question</div>
@@ -314,7 +314,7 @@ export default function ContactPage() {
                         </div>
                     </div>
 
-                    <div className="rounded-xl border border-zinc-400 bg-gradient-to-br from-blue-50 to-white p-5 shadow-sm">
+                    <div className="rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-emerald-50/40 p-5 shadow-sm shadow-blue-950/5">
                         <h2 className="text-base font-semibold text-zinc-900">Need business help?</h2>
                         <p className="mt-2 text-sm text-zinc-600">
                             Use this form for partnerships, premium upgrades, or product-related questions.

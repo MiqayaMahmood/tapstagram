@@ -3,18 +3,18 @@ import Link from "next/link";
 
 export default function PricingSection() {
     return (
-        <section id="pricing" className="bg-zinc-50 px-6 py-20">
+        <section id="pricing" className="bg-gradient-to-b from-blue-50/50 to-white px-5 py-16 sm:px-6 md:py-20">
             <div className="mx-auto max-w-7xl text-center">
-                <div className="inline-flex rounded-xl border border-zinc-400 bg-white px-4 py-1 text-md font-medium text-zinc-900 shadow-sm">
+                <div className="inline-flex rounded-2xl border border-blue-100 bg-white/80 px-4 py-1 text-sm font-semibold text-blue-700 shadow-sm backdrop-blur">
                     Pricing
                 </div>
-                <h2 className="mt-4 text-3xl font-bold tracking-tight text-zinc-900 md:text-4xl">
+                <h2 className="mt-4 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl md:text-4xl">
                     Simple pricing, clear value
                 </h2>
 
                 <div className="mt-12 grid gap-8  lg:grid-cols-2">
-                    <div className="rounded-[2rem] border border-zinc-400 bg-white p-8 text-left shadow-sm">
-                        <h3 className="text-2xl font-bold text-zinc-900">Free Plan</h3>
+                    <div className="rounded-[2rem] border border-blue-100 bg-white p-6 text-left shadow-sm shadow-blue-950/5 sm:p-8">
+                        <h3 className="text-xl font-bold text-slate-950 sm:text-2xl">Free Plan</h3>
                         <p className="mt-2 text-sm text-zinc-600">Create and share your Tapstagram profile</p>
 
                         <ul className="mt-6 space-y-3 text-sm text-zinc-700">
@@ -24,21 +24,21 @@ export default function PricingSection() {
                             <li>• Basic Explore Presence</li>
                         </ul>
 
-                        <div className="mt-8 text-3xl font-bold text-zinc-900">Free</div>
+                        <div className="mt-8 text-2xl font-bold text-slate-950 sm:text-3xl">Free</div>
 
                         <Link
                             href="/register"
-                            className="mt-6 inline-flex rounded-2xl border border-zinc-200 px-6 py-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+                            className="mt-6 inline-flex rounded-2xl border border-blue-100 px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-blue-50"
                         >
                             Get Started
                         </Link>
                     </div>
 
-                    <div className="rounded-[2rem] border border-zinc-900 bg-zinc-900 p-8 text-left text-white shadow-2xl">
+                    <div className="rounded-[2rem] border border-blue-900 bg-[radial-gradient(circle_at_top_right,rgba(6,182,212,0.22),transparent_30%),linear-gradient(135deg,#0f172a,#1e3a8a)] p-6 text-left text-white shadow-2xl shadow-blue-950/20 sm:p-8">
                         <div className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-zinc-200">
                             Most Popular
                         </div>
-                        <h3 className="mt-4 text-2xl font-bold">Premium + NFC</h3>
+                        <h3 className="mt-4 text-xl font-bold sm:text-2xl">Premium + NFC</h3>
                         <p className="mt-2 text-sm text-zinc-300">Custom presentation, analytics, and NFC card support</p>
 
                         <ul className="mt-6 space-y-3 text-sm text-zinc-200">
@@ -50,7 +50,7 @@ export default function PricingSection() {
                             <li>• Priority Support</li>
                         </ul>
 
-                        <div className="mt-8 text-3xl font-bold">CHF 29</div>
+                        <div className="mt-8 text-2xl font-bold sm:text-3xl">CHF 29</div>
                         <div className="mt-1 text-sm text-zinc-300">Launch offer</div>
 
                         <div className="mt-6 flex flex-wrap gap-3">

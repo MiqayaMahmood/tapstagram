@@ -2,7 +2,7 @@
 
 import ProjectSocialLinks from "@/components/projects/ProjectSocialLinks";
 import HeroBannerCropper from "@/components/profile/HeroBannerCropper";
-import { ArrowLeft, CheckCircle2, CircleDot, ExternalLink, Link2, MapPinned, PenSquare, Sparkles } from "lucide-react";
+import { ArrowLeft, CheckCircle2, CircleDot, ExternalLink, Handshake, Link2, MapPinned, PenSquare, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Path } from "react-hook-form";
@@ -31,6 +31,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
 import { Checkbox } from "@/components/ui/checkbox";
 import MarkdownEditor from "@/components/markdown/MarkdownEditor";
+import { PROJECT_STATUS_META, PROJECT_STATUS_VALUES } from "@/lib/project-status";
+import {
+    PROJECT_OPEN_FOR_META,
+    PROJECT_OPEN_FOR_VALUES,
+    normalizeProjectOpenFor,
+} from "@/lib/project-open-for";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
@@ -94,7 +100,12 @@ const SocialLinkInputSchema = z.object({
 
 type Props = {
     mode: "create" | "edit";
-    initial?: Partial<ProjectFormValues> & { id?: number };
+    initial?: Partial<ProjectFormValues> & {
+        id?: number;
+        status?: string | null;
+        openFor?: unknown;
+        collaborationNote?: string | null;
+    };
 };
 
 /* ---------- small UI helpers ---------- */
@@ -115,11 +126,11 @@ function SectionHeader({
 }) {
     return (
         <div className="flex items-start gap-3">
-            <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-700 ring-1 ring-zinc-200">
+            <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 text-blue-700 ring-1 ring-blue-100">
                 {icon}
             </div>
             <div className="space-y-1">
-                <h2 className="text-lg font-semibold tracking-tight text-zinc-900">{title}</h2>
+                <h2 className="text-base font-semibold tracking-tight text-slate-950 sm:text-lg">{title}</h2>
                 {subtitle && <p className="text-sm leading-6 text-zinc-500">{subtitle}</p>}
             </div>
         </div>
@@ -134,7 +145,7 @@ function FormCard({
     className?: string;
 }) {
     return (
-        <Card className={`rounded-xl border border-zinc-400 bg-white shadow-sm ${className}`}>
+        <Card className={`rounded-3xl border border-slate-200 bg-white/95 shadow-sm shadow-slate-950/5 ${className}`}>
             {children}
         </Card>
     );
@@ -433,8 +444,8 @@ export default function ProjectForm({ mode, initial }: Props) {
     ]);
 
     return (
-        <div className="min-h-screen bg-white">
-            <div className="mx-auto max-w-7xl px-4 py-6 rounded-xl border border-zinc-400 mb-2">
+        <div className="min-h-screen py-4 sm:py-6">
+            <div className="mx-auto mb-3 max-w-7xl rounded-3xl border border-slate-200 bg-white/90 px-4 py-5 shadow-sm shadow-slate-950/5 backdrop-blur sm:px-5 sm:py-6">
                 {/* Header */}
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="space-y-2">
@@ -452,7 +463,7 @@ export default function ProjectForm({ mode, initial }: Props) {
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
                         <Button
                             onClick={onBack}
                             variant="outline"
@@ -465,11 +476,11 @@ export default function ProjectForm({ mode, initial }: Props) {
                 </div>
             </div>
 
-                <div className="grid gap-2 lg:grid-cols-[270px,minmax(0,1fr),310px]">
+                <div className="grid gap-4 lg:grid-cols-[270px,minmax(0,1fr),310px]">
                     {/* Left rail */}
                     <aside className="hidden lg:block sticky top-20 self-start h-fit space-y-4">
-                        <div className="rounded-xl border border-zinc-400 bg-white p-5 shadow-sm">
-                            <div className="text-lg font-bold text-zinc-800">
+                        <div className="rounded-3xl border border-slate-200 bg-white/95 p-5 shadow-sm shadow-slate-950/5">
+                            <div className="text-base font-bold text-slate-800 sm:text-lg">
                                 Editor Navigation
                             </div>
 
@@ -477,14 +488,15 @@ export default function ProjectForm({ mode, initial }: Props) {
                                 <RailLink href="#media" label="Media" />
                                 <RailLink href="#basic" label="Basics" />
                                 <RailLink href="#story" label="Story" />
+                                <RailLink href="#collaboration" label="Status & Open For" />
                                 <RailLink href="#contact" label="Address & Contact" />
                                 <RailLink href="#links" label="Social Links" />
                                 <RailLink href="#add-links" label="Add Social Link" />
                             </nav>
                         </div>
 
-                        <div className="rounded-xl border border-zinc-400 bg-white p-5 shadow-sm">
-                            <div className="text-lg font-bold text-zinc-800">
+                        <div className="rounded-3xl border border-slate-200 bg-white/95 p-5 shadow-sm shadow-slate-950/5">
+                            <div className="text-base font-bold text-slate-800 sm:text-lg">
                                 Project Status
                             </div>
 
@@ -496,7 +508,7 @@ export default function ProjectForm({ mode, initial }: Props) {
                                     </div>
                                     <div className="h-2.5 overflow-hidden rounded-full bg-zinc-100">
                                         <div
-                                            className="h-full rounded-full bg-zinc-900 transition-all"
+                                            className="h-full rounded-full bg-gradient-to-r from-blue-700 to-cyan-500 transition-all"
                                             style={{ width: `${progress}%` }}
                                         />
                                     </div>
@@ -516,7 +528,7 @@ export default function ProjectForm({ mode, initial }: Props) {
                             </div>
                         </div>
 
-                        <div className="rounded-xl border border-zinc-400 bg-white p-2 shadow-sm">
+                        <div className="rounded-3xl border border-slate-200 bg-white/95 p-2 shadow-sm shadow-slate-950/5">
                             <Button
                                 onClick={onDelete}
                                 disabled={!projectId}
@@ -720,6 +732,78 @@ export default function ProjectForm({ mode, initial }: Props) {
                                 </CardFooter>
                             </FormCard>
                         </form>
+
+                        <section id="collaboration">
+                            <FormCard>
+                                <CardHeader className="pb-3">
+                                    <SectionHeader
+                                        icon={<Handshake className="h-5 w-5" />}
+                                        title="Status & Open For"
+                                        subtitle="Sprint 1 display fields are prepared here. Saving requires backend support for Project.status, collaborationNote, and Open For records."
+                                    />
+                                </CardHeader>
+                                <CardContent className="space-y-5">
+                                    {/* TODO(Sprint 1 backend): Enable these inputs once Project.status, collaborationNote, and ProjectOpenFor/openFor are exposed by the API. */}
+                                    <div className="rounded-2xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-sm leading-6 text-amber-800">
+                                        Project status and Open For are not present in the current Prisma Project model/API payload. The UI below is read-only until backend support is available.
+                                    </div>
+
+                                    <div className="grid gap-4 md:grid-cols-2">
+                                        <label className="grid gap-2">
+                                            <span className="text-sm font-semibold text-slate-800">Project status</span>
+                                            <select
+                                                disabled
+                                                value={initial?.status ?? ""}
+                                                className="h-11 rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-600"
+                                                onChange={() => undefined}
+                                            >
+                                                <option value="">No status available</option>
+                                                {PROJECT_STATUS_VALUES.map((status) => (
+                                                    <option key={status} value={status}>
+                                                        {PROJECT_STATUS_META[status].label}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </label>
+
+                                        <label className="grid gap-2">
+                                            <span className="text-sm font-semibold text-slate-800">Collaboration note</span>
+                                            <textarea
+                                                disabled
+                                                rows={3}
+                                                value={initial?.collaborationNote ?? ""}
+                                                placeholder="Add a short note about what you are open to."
+                                                className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600"
+                                                onChange={() => undefined}
+                                            />
+                                        </label>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <div className="text-sm font-semibold text-slate-800">Open For</div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {PROJECT_OPEN_FOR_VALUES.map((value) => {
+                                                const selected = normalizeProjectOpenFor(initial?.openFor).includes(value);
+                                                const meta = PROJECT_OPEN_FOR_META[value];
+                                                return (
+                                                    <span
+                                                        key={value}
+                                                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                                                            selected
+                                                                ? "border-blue-200 bg-blue-50 text-blue-700"
+                                                                : "border-slate-200 bg-slate-50 text-slate-500"
+                                                        }`}
+                                                    >
+                                                        <meta.Icon className="h-3.5 w-3.5" />
+                                                        {meta.label}
+                                                    </span>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </FormCard>
+                        </section>
 
                         {/* Story */}
                         <form id="story" onSubmit={story.handleSubmit(saveStory, onInvalidStory)}>

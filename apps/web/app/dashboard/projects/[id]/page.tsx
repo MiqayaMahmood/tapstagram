@@ -33,6 +33,9 @@ type ProjectDto = {
     isPublished?: boolean;
     coverImageUrl?: string | null;
     sort_order?: number | null;
+    status?: string | null;
+    openFor?: unknown;
+    collaborationNote?: string | null;
     socialLinks?: Array<{ id: string; platform: string; label?: string | null; url: string; sort_order?: number | null }>;
     plan?: string | null;
 };
@@ -166,6 +169,9 @@ function mapProjectToInitial(p: ProjectDto, _plan: string) {
         isPublished: !!p.isPublished,
         coverImageUrl: p.coverImageUrl ?? '',
         sort_order: (p.sort_order ?? 0) as number,
+        status: p.status ?? null,
+        openFor: p.openFor ?? [],
+        collaborationNote: p.collaborationNote ?? '',
 
         socialLinks: (p.socialLinks ?? []).map(l => ({
             id: l.id, // cuid string

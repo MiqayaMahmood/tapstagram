@@ -126,24 +126,24 @@ export default function DashboardPage() {
     }
 
     return (
-        <div id="dashboard" className="min-h-screen bg-gradient-to-b from-white via-zinc-50 to-slate-100">
-            <div className="mx-auto max-w-7xl px-4 py-8">
+        <div id="dashboard" className="min-h-screen">
+            <div className="mx-auto max-w-7xl px-0 py-4 sm:py-8">
             {/* Back + breadcrumbs */}
-                <div className="mb-4 rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+                <div className="mb-4 rounded-3xl border border-slate-200 bg-white/90 p-5 shadow-sm shadow-slate-950/5 backdrop-blur sm:p-6">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                             <div className="inline-flex rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-600">
                                 Dashboard
                             </div>
-                            <h1 className="mt-3 text-2xl font-semibold tracking-tight text-zinc-900">
+                            <h1 className="mt-3 text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
                                 Manage your profile
                             </h1>
-                            <p className="mt-1 text-sm text-zinc-500">
+                            <p className="mt-1 text-sm leading-6 text-slate-500">
                                 Update your public identity, media, tags, social links, projects, and leads.
                             </p>
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-3">
                             <Button
                                 onClick={onBack}
                                 variant="outline"
@@ -156,7 +156,7 @@ export default function DashboardPage() {
                             {me?.username ? (
                                 <Link
                                     href={`/${me.username}`}
-                                    className="inline-flex rounded-xl bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700"
+                                    className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
                                 >
                                     View Public Profile
                                 </Link>
@@ -193,7 +193,7 @@ export default function DashboardPage() {
                 
 
                 {/* Center: main editors */}
-                <section className="space-y-2">
+                <section className="space-y-3">
                     
                     
                     {loading || !me ? (
@@ -436,7 +436,7 @@ function BasicsCard({ me, onSaved }: { me: Me; onSaved: (u: Partial<Me>) => void
                 </label>
             </div>
 
-            <div className="mt-4 flex items-center justify-end gap-3">
+            <div className="mt-4 flex flex-wrap items-center justify-end gap-3">
                 {savedAt ? (
                     <div className="text-xs font-medium text-emerald-600">Saved</div>
                 ) : null}
@@ -444,7 +444,7 @@ function BasicsCard({ me, onSaved }: { me: Me; onSaved: (u: Partial<Me>) => void
                 <button
                     onClick={save}
                     disabled={saving}
-                    className="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-600 disabled:opacity-60"
+                    className="min-h-11 rounded-2xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-60"
                 >
                     {saving ? 'Saving…' : 'Save changes'}
                 </button>
@@ -469,15 +469,15 @@ function DashboardSectionCard({
     children: React.ReactNode;
 }) {
     return (
-        <section id={id} className="rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm">
+        <section id={id} className="rounded-3xl border border-blue-100 bg-white/95 p-4 shadow-sm shadow-blue-950/5 sm:p-5">
             <div className="mb-4 flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 text-blue-700 ring-1 ring-blue-100">
                     <Icon className="h-5 w-5" />
                 </div>
                 <div>
-                    <h2 className="text-base font-semibold text-zinc-900">{title}</h2>
+                    <h2 className="text-base font-semibold tracking-tight text-slate-950">{title}</h2>
                     {description ? (
-                        <p className="mt-0.5 text-sm text-zinc-500">{description}</p>
+                        <p className="mt-0.5 text-sm leading-6 text-slate-500">{description}</p>
                     ) : null}
                 </div>
             </div>

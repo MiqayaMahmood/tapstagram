@@ -6,6 +6,7 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import DynamicHeroBanner from "@/components/DynamicHeroBanner";
+import ProjectStatusBadge from "@/components/projects/ProjectStatusBadge";
 
 type P = {
     id: number;
@@ -32,6 +33,7 @@ type P = {
     bookmarksCount?: number;
     followedByMe?: boolean;
     status?: "active" | "paused" | "completed" | "draft" | string | null;
+    updatedAt?: string | null;
 };
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
@@ -42,6 +44,11 @@ export default function ProjectHero({ project }: { project: P }) {
 
 
     const [stats, setStats] = useState<{ visits: number; siteClicks: number; social: { platform: string; count: number }[] } | null>(null);
+    const updatedAt = project.updatedAt ? new Date(project.updatedAt) : null;
+    const updatedLabel =
+        updatedAt && !Number.isNaN(updatedAt.getTime())
+            ? updatedAt.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })
+            : null;
 
     useEffect(() => {
         (async () => {
@@ -51,9 +58,10 @@ export default function ProjectHero({ project }: { project: P }) {
     }, [project.id]);
 
     return (
-        <div className="border rounded-2xl overflow-hidden bg-white">
+        <div className="overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-sm shadow-blue-950/5">
+            <div className="h-1 bg-gradient-to-r from-slate-900 via-blue-700 to-emerald-400" />
             {/* Cover */}
-            <div className="relative h-72 md:h-80 ">
+            <div className="relative h-56 md:h-80">
                 {project.coverImageUrl ? (
                     <img
                         src={project.coverImageUrl}
@@ -89,24 +97,33 @@ export default function ProjectHero({ project }: { project: P }) {
                             <img
                                 src={project.profile_picture_url}
                                 alt=""
-                                className="w-30 h-30 md:w-24  md:h-24 rounded-full object-cover border-4 border-white shadow"
+                                className="h-20 w-20 rounded-full border-4 border-white object-cover shadow-lg shadow-blue-950/10 md:h-24 md:w-24"
                             />
                         ) : (
-                                <div className="w-30 h-30 md:w-24 md:h-24 rounded-full bg-gray-200 border-4 border-white shadow" />
+                                <div className="h-20 w-20 rounded-full border-4 border-white bg-gradient-to-br from-blue-50 to-cyan-50 shadow-lg shadow-blue-950/10 md:h-24 md:w-24" />
                         )}
                     </div>
 
                     {/* Name and basics */}
                     <div className="min-w-0 flex-1 z-10 space-y-2">
-                        {project.targetIndustry && <h1 className="text-xl md:text-2xl font-bold truncate">{project.targetIndustry}</h1>}
-                        {project.title && <div className="text-gray-700  truncate">{project.title}</div>}
-                        {project.country && <div className="text-sm text-gray-600 truncate">{project.country}</div>}
-                        <div className="text-xs text-gray-500 mt-1">
+                        {project.targetIndustry && <h1 className="truncate text-xl font-bold tracking-tight text-slate-950 md:text-2xl">{project.targetIndustry}</h1>}
+                        {project.title && <div className="truncate text-sm text-slate-700 md:text-base">{project.title}</div>}
+                        {project.country && <div className="truncate text-sm text-slate-600">{project.country}</div>}
+                        <div className="flex flex-wrap items-center gap-2">
+                            <ProjectStatusBadge status={project.status} compact />
+                            {updatedLabel ? (
+                                <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600">
+                                    <CalendarDays className="h-3 w-3" />
+                                    Updated {updatedLabel}
+                                </span>
+                            ) : null}
+                        </div>
+                        <div className="mt-1 text-xs text-slate-500">
                             <b>{followers}</b> followers · <b>{following}</b> following
                         </div>
-                        <div className="flex flex-wrap items-center gap-10">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4">
                             {project.category ? (
-                                <span className={`inline-flex items-center rounded-full text-xs font-medium ${project.coverImageUrl ? "bg-white/20" : "bg-neutral-100 text-neutral-700"}`}>
+                                <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${project.coverImageUrl ? "bg-white/20" : "bg-blue-50 text-blue-700"}`}>
                                     {project.category}
                                 </span>
                             ) : null}
@@ -122,7 +139,7 @@ export default function ProjectHero({ project }: { project: P }) {
                             )}
 
                             {stats && (
-                                <div className={`mt-2 text-xs ${project.coverImageUrl ? "text-white/90" : "text-neutral-600"}`}>
+                                <div className={`mt-2 text-xs ${project.coverImageUrl ? "text-white/90" : "text-slate-600"}`}>
                                     {stats.visits} visits • {stats.social.reduce((a, b) => a + b.count, 0)} social clicks
                                 </div>
                             )}

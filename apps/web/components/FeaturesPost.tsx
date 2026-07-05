@@ -6,19 +6,19 @@ export default function SampleProfilesSection() {
     
 
     return (
-        <section className="bg-zinc-50 px-6 py-20">
+        <section className="bg-white px-5 py-16 sm:px-6 md:py-20">
             <div className="mx-auto max-w-7xl text-center">
-                <div className="inline-flex rounded-xl border border-zinc-400 bg-white px-3 py-1 text-md font-medium text-zinc-600 shadow-sm">
+                <div className="inline-flex rounded-2xl border border-blue-100 bg-blue-50/70 px-3 py-1 text-sm font-semibold text-blue-700 shadow-sm">
                     Get Coonected
                 </div>
-                <h2 className="mt-4 text-3xl font-bold tracking-tight text-zinc-900 md:text-4xl">
+                <h2 className="mt-4 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl md:text-4xl">
                     One touch access to all your Social media profiles
                 </h2>
 
-                <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                    <img src={logo_url1} alt="Tapstagram" className="overflow-hidden rounded-[2rem] border border-zinc-400" />    
-                    <img src={logo_url2} alt="Tapstagram" className="overflow-hidden rounded-[2rem] border border-zinc-400" />    
-                    <img src={logo_url3} alt="Tapstagram" className="overflow-hidden rounded-[2rem] border border-zinc-400" />    
+                <div className="mt-10 grid gap-5 sm:grid-cols-2 md:mt-12 lg:grid-cols-3">
+                    <img src={logo_url1} alt="Tapstagram" className="overflow-hidden rounded-[2rem] border border-blue-100 shadow-sm shadow-blue-950/5" />    
+                    <img src={logo_url2} alt="Tapstagram" className="overflow-hidden rounded-[2rem] border border-blue-100 shadow-sm shadow-blue-950/5" />    
+                    <img src={logo_url3} alt="Tapstagram" className="overflow-hidden rounded-[2rem] border border-blue-100 shadow-sm shadow-blue-950/5" />    
                     
                 </div>
             </div>

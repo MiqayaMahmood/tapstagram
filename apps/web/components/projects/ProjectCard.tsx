@@ -6,7 +6,6 @@ import { useAuth } from "@/context/AuthContext";
 import { Separator } from "@/components/ui/Separator";
 import { followProject, unfollowProject } from "@/services/follow";
 import {
-    BriefcaseBusiness,
     ExternalLink,
     CalendarDays,
     MapPin,
@@ -15,6 +14,8 @@ import {
     Bookmark,
 } from "lucide-react";
 import  DynamicHeroBanner  from "@/components/DynamicHeroBanner"; 
+import ProjectStatusBadge from "@/components/projects/ProjectStatusBadge";
+import ProjectOpenForChips from "@/components/projects/ProjectOpenForChips";
 
 type ProjectLite = {
     id: number;
@@ -34,6 +35,8 @@ type ProjectLite = {
     updatedAt?: string | null;
     isPublished?: boolean;
     status?: "active" | "paused" | "completed" | "draft" | string | null;
+    openFor?: unknown;
+    collaborationNote?: string | null;
     followersCount?: number;
     bookmarksCount?: number;
     isFollowing?: boolean;
@@ -59,25 +62,6 @@ function getHostname(url?: string | null) {
     } catch {
         return url;
     }
-}
-
-function statusClasses(status?: string | null, isPublished?: boolean) {
-    const s = (status || "").toLowerCase();
-
-    if (!isPublished || s === "draft") {
-        return "bg-zinc-100 text-zinc-700";
-    }
-    if (s === "active") {
-        return "bg-emerald-50 text-emerald-700";
-    }
-    if (s === "paused") {
-        return "bg-amber-50 text-amber-700";
-    }
-    if (s === "completed") {
-        return "bg-blue-50 text-blue-700";
-    }
-
-    return "bg-zinc-100 text-zinc-700";
 }
 
 export default function ProjectCard({ project, onFollowChange, plan }: Props) {
@@ -116,7 +100,8 @@ export default function ProjectCard({ project, onFollowChange, plan }: Props) {
     }
 
     return (
-        <div className="group overflow-hidden rounded-3xl border border-emerald-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
+        <div className="group overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-sm shadow-blue-950/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md hover:shadow-emerald-950/10">
+            <div className="h-1 bg-gradient-to-r from-slate-900 via-blue-700 to-emerald-400" />
             <Link href={projectHref} className="block">
                 {project.coverImageUrl ? (
                     <div className="relative overflow-hidden bg-emerald-50">
@@ -162,24 +147,17 @@ export default function ProjectCard({ project, onFollowChange, plan }: Props) {
                         </span>
                     ) : null}
 
-                    {(project.status || project.isPublished !== undefined) ? (
-                        <span
-                            className={`rounded-full px-3 py-1 text-xs font-medium ${statusClasses(
-                                project.status,
-                                project.isPublished
-                            )}`}
-                        >
-                            {project.status
-                                ? project.status.charAt(0).toUpperCase() + project.status.slice(1)
-                                : project.isPublished
-                                    ? "Published"
-                                    : "Draft"}
+                    {project.status ? <ProjectStatusBadge status={project.status} compact /> : null}
+
+                    {!project.status && project.isPublished !== undefined ? (
+                        <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+                            {project.isPublished ? "Published" : "Draft"}
                         </span>
                     ) : null}
                 </div>
 
                 <div className="mt-4">
-                    <h3 className="line-clamp-1 text-lg font-semibold tracking-tight text-zinc-900 transition group-hover:text-emerald-700">
+                    <h3 className="line-clamp-1 text-base font-semibold tracking-tight text-slate-950 transition group-hover:text-emerald-700 sm:text-lg">
                         {project.title}
                     </h3>
 
@@ -226,6 +204,12 @@ export default function ProjectCard({ project, onFollowChange, plan }: Props) {
                     ) : null}
                 </div>
 
+                {project.openFor ? (
+                    <div className="mt-4">
+                        <ProjectOpenForChips openFor={project.openFor} limit={2} compact />
+                    </div>
+                ) : null}
+
                 {(project.followersCount !== undefined || project.bookmarksCount !== undefined) ? (
                     <>
                         <Separator className="my-4" />
@@ -249,9 +233,9 @@ export default function ProjectCard({ project, onFollowChange, plan }: Props) {
 
                 <Separator className="my-4" />
 
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
                     <Link
-                        className="inline-flex items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+                        className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
                         href={projectHref}
                     >
                         <ExternalLink className="mr-2 h-4 w-4" />
@@ -262,9 +246,9 @@ export default function ProjectCard({ project, onFollowChange, plan }: Props) {
                         onClick={toggleFollow}
                         disabled={busy || !token}
                         title={!token ? "Sign in required" : ""}
-                        className={`inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition ${isFollowing
-                                ? "bg-zinc-900 text-white hover:bg-zinc-700"
-                                : "border border-zinc-300 bg-zinc-50 text-zinc-700 hover:bg-zinc-100"
+                        className={`inline-flex min-h-11 items-center justify-center rounded-2xl px-4 py-2 text-sm font-semibold transition ${isFollowing
+                                ? "bg-blue-700 text-white hover:bg-blue-800"
+                                : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
                             } disabled:cursor-not-allowed disabled:opacity-60`}
                     >
                         {busy ? "Please wait…" : isFollowing ? "Following" : "Follow"}

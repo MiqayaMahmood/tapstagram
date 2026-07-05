@@ -17,6 +17,7 @@ import ProjectCard from "@/components/projects/ProjectCard";
 import { Separator } from '@/components/ui/Separator';
 import PremiumPresentationCard from '@/components/presentation/PremiumPresentationCard';
 import UserMiniCard from '@/components/explorer/UserMiniCard';
+import { Building2, Search, SlidersHorizontal, UsersRound } from "lucide-react";
 
 const CATEGORY_OPTIONS = [
     { v: "", l: "All categories" },
@@ -52,9 +53,9 @@ function SortChip({
     return (
         <button
             onClick={onClick}
-            className={`inline-flex items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-100 ${active
-                    ? "border-zinc-900 bg-zinc-900 text-white shadow-sm"
-                    : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400 hover:bg-zinc-50"
+            className={`inline-flex min-h-10 items-center justify-center rounded-2xl border px-4 py-2 text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-100 ${active
+                    ? "border-blue-700 bg-blue-700 text-white shadow-sm"
+                    : "border-slate-200 bg-white text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50"
                 }`}
         >
             {label}
@@ -229,13 +230,13 @@ export default function ExplorePage() {
     const goPage = (nextPage: number) => pushQS({ page: nextPage });
     
     return (
-        <div className="min-h-screen bg-gradient-to-b from-zinc-50 via-white to-zinc-100/60">
+        <div className="min-h-screen rounded-t-[2rem] bg-[radial-gradient(circle_at_top_left,rgba(29,78,216,0.10),transparent_28%),linear-gradient(180deg,rgba(239,246,255,0.85),rgba(255,255,255,0.95)_38%,rgba(248,250,252,0.95))] py-4 sm:py-6">
             <div className="grid gap-4 lg:grid-cols-[280px,minmax(0,1fr),320px]">
                 <aside className="hidden lg:block sticky top-20 self-start h-fit space-y-4">
                     
 
                     {!token && (
-                        <div className="rounded-3xl border border-zinc-400 bg-white/90 backdrop-blur p-5 shadow-sm">
+                        <div className="rounded-3xl border border-slate-200 bg-white/90 p-5 shadow-sm shadow-slate-950/5 backdrop-blur">
                             <div className="flex items-center gap-3">
                                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-zinc-100 text-sm font-semibold text-zinc-700 shadow-inner">
                                     U
@@ -281,50 +282,54 @@ export default function ExplorePage() {
 
                 <section className="space-y-4  ">
                     
-                    <div className="lg:block z-30 sticky top-20 bg-white/90">    
-                        <div className="rounded-xl border border-zinc-400 bg-white/90 backdrop-blur px-5 py-4 shadow-sm">
+                    <div className="sticky top-16 z-30 space-y-3 rounded-b-3xl bg-blue-50/70 pb-3 pt-2 backdrop-blur-xl lg:top-20">
+                        <div className="rounded-3xl border border-blue-100 bg-white/85 px-4 py-4 shadow-sm shadow-blue-950/5 backdrop-blur sm:px-5">
                             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                                 <div className="flex flex-col gap-3 md:flex-row md:items-center">
-                                    <div>
-                                        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
-                                            Explore
-                                        </h1>
-                                        <p className="text-sm text-zinc-500">
-                                            Discover people and businesses across your network
-                                        </p>
+                                    <div className="flex items-start gap-3">
+                                        <div className="mt-1 hidden h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 text-white shadow-sm shadow-blue-950/20 sm:flex">
+                                            <Search className="h-5 w-5" />
+                                        </div>
+                                        <div>
+                                            <h1 className="text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
+                                                Explore
+                                            </h1>
+                                            <p className="text-sm leading-6 text-slate-500">
+                                                Discover people and businesses across your network
+                                            </p>
+                                        </div>
                                     </div>
 
-                                    <div className="inline-flex rounded-xl bg-zinc-300 p-1">
+                                    <div className="inline-flex w-full rounded-2xl bg-blue-950/5 p-1 ring-1 ring-blue-100 sm:w-auto">
                                         <button
-                                            className={`rounded-xl px-4 py-2 text-sm font-medium border-zinc-400 transition ${mode === "profiles"
-                                                    ? "bg-white text-zinc-900 shadow-sm"
-                                                    : "text-zinc-600 hover:text-zinc-900"
+                                            className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition sm:flex-none ${mode === "profiles"
+                                                    ? "bg-white text-blue-700 shadow-sm"
+                                                    : "text-slate-600 hover:text-slate-950"
                                                 }`}
                                             onClick={() => pushQS({ type: "profiles", page: 1 })}
                                         >
+                                            <UsersRound className="h-4 w-4" />
                                             Individuals
                                         </button>
                                         <button
-                                            className={`rounded-2xl px-4 py-2 text-sm font-medium transition ${mode === "business"
-                                                    ? "bg-white text-zinc-900 shadow-sm"
-                                                    : "text-zinc-600 hover:text-zinc-900"
+                                            className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition sm:flex-none ${mode === "business"
+                                                    ? "bg-white text-blue-700 shadow-sm"
+                                                    : "text-slate-600 hover:text-slate-950"
                                                 }`}
                                             onClick={() => pushQS({ type: "business", page: 1 })}
                                         >
+                                            <Building2 className="h-4 w-4" />
                                             Businesses
                                         </button>
                                     </div>
                                 </div>
 
-                                <div className="rounded-xl bg-zinc-50 px-4 py-2 text-sm font-medium text-zinc-800 border border-zinc-400">
-                                    Total {mode === "profiles" ? "Individuals" : "Businesses"}:{" "}
-                                    <span className="text-zinc-900">{total}</span>
-                                </div>
+                                
                             </div>
                         </div>
 
                         {mode === "profiles" ? (
-                            <div className="rounded-xl border border-zinc-400 bg-white backdrop-blur p-4 shadow-sm">
+                            <div className="rounded-3xl border border-blue-100 bg-white/90 p-3 shadow-sm shadow-blue-950/5 backdrop-blur sm:p-4">
                                 <div className="flex flex-wrap gap-2">
                                     <SortChip label="Newest" active={parsed.sortP === "newest"} onClick={() => pushQS({ sort: "newest" })} />
                                     <SortChip label="Oldest" active={parsed.sortP === "oldest"} onClick={() => pushQS({ sort: "oldest" })} />
@@ -332,10 +337,14 @@ export default function ExplorePage() {
                                 </div>
                             </div>
                         ) : (
-                            <div className="rounded-xl border border-zinc-400 bg-white/90 backdrop-blur p-4 shadow-sm">
-                                <div className="flex flex-wrap items-center gap-3">
+                            <div className="rounded-3xl border border-blue-100 bg-white/90 p-3 shadow-sm shadow-blue-950/5 backdrop-blur sm:p-4">
+                                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                                    <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                                        <SlidersHorizontal className="h-4 w-4 text-blue-600" />
+                                        Filters
+                                    </div>
                                     <select
-                                        className="rounded-xl border border-zinc-400 bg-white px-4 py-2 text-md text-zinc-700 shadow-sm outline-none transition focus:border-zinc-400"
+                                        className="min-h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 sm:w-auto"
                                         value={parsed.category}
                                         onChange={(e) => pushQS({ pcat: e.target.value })}
                                     >
@@ -347,7 +356,7 @@ export default function ExplorePage() {
                                     </select>
 
                                     <select
-                                        className="rounded-xl border border-zinc-400 bg-white px-4 py-2 text-md text-zinc-700 shadow-sm outline-none transition focus:border-zinc-400"
+                                        className="min-h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 sm:w-auto"
                                         value={parsed.sortJ}
                                         onChange={(e) => pushQS({ psort: e.target.value })}
                                         >   
@@ -363,17 +372,17 @@ export default function ExplorePage() {
                         )}
                     </div>
                     {loading ? (
-                        <div className="rounded-3xl border border-zinc-200 bg-white p-6 text-sm text-zinc-500 shadow-sm">
+                        <div className="rounded-3xl border border-blue-100 bg-white/90 p-6 text-sm text-slate-600 shadow-sm shadow-blue-950/5">
                             Loading…
                         </div>
                     ) : mode === "profiles" ? (
                         profiles.length === 0 ? (
-                            <div className="rounded-3xl border border-dashed border-zinc-300 bg-white p-8 text-sm text-zinc-500 shadow-sm">
+                            <div className="rounded-3xl border border-dashed border-blue-200 bg-blue-50/50 p-8 text-sm text-slate-600 shadow-sm">
                                 No profiles found. Try different filters.
                             </div>
                         ) : (
                             <>
-                                <ul className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                                <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                                     {profiles.map((p) => (
                                         <ProfileCard key={p.id} profile={p} />
                                     ))}
@@ -382,12 +391,12 @@ export default function ExplorePage() {
                             </>
                         )
                     ) : projects.length === 0 ? (
-                        <div className="rounded-xl border border-dashed border-zinc-400 bg-white p-8 text-sm text-zinc-500 shadow-sm">
+                        <div className="rounded-3xl border border-dashed border-blue-200 bg-blue-50/50 p-8 text-sm text-slate-600 shadow-sm">
                             No projects found. Try different filters.
                         </div>
                     ) : (
                         <>
-                            <ul className="grid gap-2 sm:grid-cols-1 xl:grid-cols-1">
+                            <ul className="grid gap-3">
                                 {projects.map((p) => (
                                     <ProjectCard key={p.id} project={p} plan={me?.plan || 'free'} />
                                 ))}
@@ -433,21 +442,21 @@ function Pager({
     pageSize: number;
 }) {
     return (
-        <div className="flex items-center justify-between rounded-3xl border border-zinc-200 bg-white/90 px-4 py-3 shadow-sm">
+        <div className="flex flex-col items-stretch gap-3 rounded-3xl border border-slate-200 bg-white/90 px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
             <button
-                className="rounded-2xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={!canPrev}
                 onClick={() => goPage(page - 1)}
             >
                 Previous
             </button>
 
-            <div className="text-sm text-zinc-500">
-                Page <span className="font-semibold text-zinc-900">{page}</span> · {pageSize} / page
+            <div className="text-center text-sm text-slate-500">
+                Page <span className="font-semibold text-slate-950">{page}</span> / {pageSize} per page
             </div>
 
             <button
-                className="rounded-2xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={!canNext}
                 onClick={() => goPage(page + 1)}
             >
