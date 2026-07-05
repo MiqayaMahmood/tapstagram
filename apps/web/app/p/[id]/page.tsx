@@ -108,8 +108,8 @@ export default async function PublicProfilePage({ params }: { params: { id: stri
             
 
             {/* Projects */}
-            <div className="border rounded-xl border-zinc-400 p-4 bg-white">
-                <h3 className="font-semibold mb-2">Projects</h3>
+            <div className="min-w-0 rounded-2xl border border-blue-100 bg-white p-4">
+                <h3 className="mb-2 text-base font-semibold sm:text-lg">Projects</h3>
                 <ProfileProjects profileId={p.id} items={p.projectLinks} />
             </div>
 

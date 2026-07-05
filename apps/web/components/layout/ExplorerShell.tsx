@@ -22,8 +22,8 @@ export default function ExplorerShell({ left, children, right, }: React.PropsWit
 
     return (
 
-        <div className="max-w-7xl mx-auto">
-            <div className="bg-white rounded-xl border-zinc-400 border bg-white p-4 flex mb-2 items-center justify-between">
+        <div className="mx-auto max-w-7xl min-w-0">
+            <div className="mb-2 flex items-center justify-between rounded-2xl border border-blue-100 bg-white p-3 shadow-sm">
                 
                 <Button onClick={onBack} className="inline-flex items-center">
                     <ArrowLeft className="mr-2 h-4 w-4" />
@@ -31,15 +31,15 @@ export default function ExplorerShell({ left, children, right, }: React.PropsWit
                 </Button>
 
             </div>   
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-2">
+            <div className="grid min-w-0 grid-cols-1 gap-2 md:grid-cols-12 md:gap-2">
                 {/* Left */}
-                <aside className="md:col-span-3 space-y-2">{left}</aside>
+                <aside className="hidden space-y-2 md:order-1 md:col-span-3 md:block">{left}</aside>
 
                 {/* Center */}
-                <main className="md:col-span-6 space-y-2">{children}</main>
+                <main className="order-1 min-w-0 space-y-2 md:order-2 md:col-span-6">{children}</main>
 
                 {/* Right */}
-                <aside className="md:col-span-3 space-y-2">{right}</aside>
+                <aside className="hidden space-y-2 md:order-3 md:col-span-3 md:block">{right}</aside>
             </div>
         </div>
     );

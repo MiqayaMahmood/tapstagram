@@ -192,8 +192,8 @@ useEffect(() => {
     };
 
   return (
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
-          <div>
+      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
+          <div className="min-w-0">
               {/* Back + breadcrumbs */}
               <div className="mb-4 flex flex-col gap-3 rounded-3xl border border-blue-100 bg-white/90 px-4 py-3 shadow-sm shadow-blue-950/5 backdrop-blur sm:flex-row sm:items-center sm:justify-between">
                   <div className="gap-4">
@@ -294,9 +294,9 @@ useEffect(() => {
                   </Card>
               ) : null}
               {/* TWO-COLUMN CONTENT AREA */}
-              <div className="mt-4 grid gap-4 lg:grid-cols-2">
+              <div className="mt-4 grid min-w-0 gap-4 lg:grid-cols-2">
                   {/* Column A */}
-                  <div className="space-y-4">
+                  <div className="min-w-0 space-y-4">
                       {/* STORY */}
                       <Card className="rounded-3xl border border-blue-100 shadow-sm shadow-blue-950/5">
                           <CardHeader className="pb-3">
@@ -354,7 +354,7 @@ useEffect(() => {
                   </div>
 
                   {/* Column B */}
-                  <div className="space-y-4">
+                  <div className="min-w-0 space-y-4">
                       <Card className="rounded-3xl border border-blue-100 shadow-sm shadow-blue-950/5">
                           <CardHeader className="pb-3">
                               <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
@@ -462,7 +462,7 @@ useEffect(() => {
 
                   <button
                       onClick={() => setLeadOpen(true)}
-                      className="rounded-xl bg-neutral-900 px-6 py-3 text-sm font-medium text-white transition hover:bg-neutral-700"
+                      className="h-10 rounded-xl bg-neutral-900 px-4 text-sm font-medium text-white transition hover:bg-neutral-700 sm:h-11 sm:px-6"
                   >
                       Contact
                   </button>

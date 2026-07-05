@@ -61,12 +61,12 @@ export default function ProjectHero({ project }: { project: P }) {
         <div className="overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-sm shadow-blue-950/5">
             <div className="h-1 bg-gradient-to-r from-slate-900 via-blue-700 to-emerald-400" />
             {/* Cover */}
-            <div className="relative h-56 md:h-80">
+            <div className="relative h-44 sm:h-56 md:h-80">
                 {project.coverImageUrl ? (
                     <img
                         src={project.coverImageUrl}
                         alt=""
-                        className="select-none"
+                        className="h-full w-full select-none object-cover"
                     />
                 ) : (
                         <DynamicHeroBanner
@@ -90,7 +90,7 @@ export default function ProjectHero({ project }: { project: P }) {
 
             {/* Header row */}
             <div className="px-4 pb-4">
-                <div className="-mt-5 flex items-end gap-4 ">
+                <div className="-mt-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4">
                     {/* Avatar */}
                     <div className="shrink-0 z-10">
                         {project.profile_picture_url ? (
@@ -105,10 +105,10 @@ export default function ProjectHero({ project }: { project: P }) {
                     </div>
 
                     {/* Name and basics */}
-                    <div className="min-w-0 flex-1 z-10 space-y-2">
-                        {project.targetIndustry && <h1 className="truncate text-xl font-bold tracking-tight text-slate-950 md:text-2xl">{project.targetIndustry}</h1>}
-                        {project.title && <div className="truncate text-sm text-slate-700 md:text-base">{project.title}</div>}
-                        {project.country && <div className="truncate text-sm text-slate-600">{project.country}</div>}
+                    <div className="z-10 min-w-0 flex-1 space-y-2">
+                        {project.targetIndustry && <h1 className="break-words text-xl font-bold tracking-tight text-slate-950 md:text-2xl">{project.targetIndustry}</h1>}
+                        {project.title && <div className="break-words text-sm text-slate-700 md:text-base">{project.title}</div>}
+                        {project.country && <div className="break-words text-sm text-slate-600">{project.country}</div>}
                         <div className="flex flex-wrap items-center gap-2">
                             <ProjectStatusBadge status={project.status} compact />
                             {updatedLabel ? (
@@ -151,8 +151,10 @@ export default function ProjectHero({ project }: { project: P }) {
                     </div>
                     
                     {/* Actions */}
-                    <ProjectFollowButton projectId={project.id} initialFollowing={!!project.followedByMe} />
-                    <ProjectBookmarkButton projectId={project.id} />
+                    <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
+                        <ProjectFollowButton projectId={project.id} initialFollowing={!!project.followedByMe} />
+                        <ProjectBookmarkButton projectId={project.id} />
+                    </div>
                 </div>
             </div>
         </div>

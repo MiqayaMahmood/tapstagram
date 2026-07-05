@@ -76,7 +76,7 @@ export default function ProfileCard({ profile, onFollowChange }: Props) {
     const showPremium = (profile.plan || "").toLowerCase() === "premium";
 
     return (
-        <div className="group overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-sm shadow-blue-950/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md hover:shadow-blue-950/10">
+        <div className="group w-full min-w-0 overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-sm shadow-blue-950/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md hover:shadow-blue-950/10">
             <div className="h-1 bg-gradient-to-r from-blue-700 via-cyan-500 to-emerald-400" />
             <Link href={profilePath} className="block">
                 <div className="relative h-24 w-full overflow-hidden bg-blue-50">
@@ -92,10 +92,10 @@ export default function ProfileCard({ profile, onFollowChange }: Props) {
                 </div>
             </Link>
 
-            <div className="relative px-5 pb-5">
+            <div className="relative min-w-0 px-4 pb-4 sm:px-5 sm:pb-5">
                 <div className="-mt-14 flex justify-center">
                     <Link href={profilePath}>
-                        <div className="h-28 w-28 overflow-hidden rounded-full border-4 border-white bg-slate-100 shadow-lg shadow-slate-950/10 ring-1 ring-slate-200">
+                        <div className="h-24 w-24 overflow-hidden rounded-full border-4 border-white bg-slate-100 shadow-lg shadow-slate-950/10 ring-1 ring-slate-200 sm:h-28 sm:w-28">
                             {profile.profile_picture_url ? (
                                 <img
                                     src={profile.profile_picture_url}
@@ -103,7 +103,7 @@ export default function ProfileCard({ profile, onFollowChange }: Props) {
                                     className="h-full w-full object-cover object-center"
                                 />
                             ) : (
-                                <div className="flex h-full w-full items-center justify-center bg-zinc-200 text-3xl font-semibold uppercase text-zinc-700">
+                                <div className="flex h-full w-full items-center justify-center bg-zinc-200 text-2xl font-semibold uppercase text-zinc-700 sm:text-3xl">
                                     {profile.name?.substring(0, 2) || "US"}
                                 </div>
                             )}
@@ -115,7 +115,7 @@ export default function ProfileCard({ profile, onFollowChange }: Props) {
                     <Link href={profilePath} className="inline-flex max-w-full items-center gap-2">
                         <h3
                             title={profile.name}
-                            className="max-w-[220px] truncate text-lg font-semibold tracking-tight text-slate-950 transition group-hover:text-blue-700 sm:text-xl"
+                            className="max-w-[220px] truncate text-base font-semibold tracking-tight text-slate-950 transition group-hover:text-blue-700 sm:text-xl"
                         >
                             {profile.name}
                         </h3>
@@ -135,7 +135,7 @@ export default function ProfileCard({ profile, onFollowChange }: Props) {
 
                     <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                         {profile.industry ? (
-                            <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-medium text-violet-700">
+                            <span className="max-w-full truncate rounded-full bg-violet-50 px-3 py-1 text-xs font-medium text-violet-700">
                                 {profile.industry}
                             </span>
                         ) : null}
@@ -197,7 +197,7 @@ export default function ProfileCard({ profile, onFollowChange }: Props) {
                     <div className="mt-5 grid grid-cols-2 gap-2">
                         <Link
                             href={profilePath}
-                            className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                            className="inline-flex h-10 min-w-0 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 sm:h-11"
                         >
                             View
                         </Link>
@@ -206,7 +206,7 @@ export default function ProfileCard({ profile, onFollowChange }: Props) {
                             onClick={toggleFollow}
                             disabled={busy || !token}
                             title={!token ? "Sign in required" : ""}
-                            className={`inline-flex min-h-11 items-center justify-center rounded-2xl px-4 py-2 text-sm font-semibold transition ${isFollowing
+                            className={`inline-flex h-10 min-w-0 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition sm:h-11 ${isFollowing
                                 ? "bg-blue-700 text-white hover:bg-blue-800"
                                     : "border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
                                 } disabled:cursor-not-allowed disabled:opacity-60`}

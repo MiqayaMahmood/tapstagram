@@ -43,14 +43,14 @@ export default function ProfileProjects({
 }) {
   if (!items?.length) {
     return (
-      <div className="rounded-2xl border border-zinc-300 bg-white p-5 text-sm text-zinc-500 shadow-sm">
+      <div className="rounded-2xl border border-blue-100 bg-white p-4 text-sm text-zinc-500 shadow-sm sm:p-5">
         No projects yet.
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
       {items.map((p) => {
         const started = formatDate(p.startedOn);
         const websiteLabel = getHostname(p.website || p.url);
@@ -58,7 +58,7 @@ export default function ProfileProjects({
         return (
           <div
             key={p.id}
-            className="group overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            className="group min-w-0 overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
           >
             {/* Cover */}
             <div className="relative h-20 w-full overflow-hidden bg-zinc-100">
@@ -79,19 +79,19 @@ export default function ProfileProjects({
               {/* Meta chips */}
               <div className="mb-3 flex flex-wrap gap-2">
                 {p.category && (
-                  <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+                  <span className="max-w-full truncate rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
                     {p.category}
                   </span>
                 )}
                 {p.targetindustry && (
-                  <span className="rounded-full bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-700">
+                  <span className="max-w-full truncate rounded-full bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-700">
                     {p.targetindustry}
                   </span>
                         )}
                 </div>
                 <div className="mb-3 flex flex-wrap gap-2">
                 {p.country && (
-                  <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+                  <span className="max-w-full truncate rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
                     {p.country }
                   </span>
                 )}
@@ -104,7 +104,7 @@ export default function ProfileProjects({
 
               {/* Title */}
               <Link href={`/projects/${p.id}`} className="block">
-                <h3 className="line-clamp-2 text-lg font-semibold text-zinc-900 transition group-hover:text-blue-700">
+                <h3 className="line-clamp-2 break-words text-base font-semibold text-zinc-900 transition group-hover:text-blue-700 sm:text-lg">
                   {p.title}
                 </h3>
               </Link>
@@ -117,10 +117,10 @@ export default function ProfileProjects({
               )}
 
               {/* Footer actions */}
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="mt-4 grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-3">
                 <Link
                   href={`/projects/${p.id}`}
-                  className="inline-flex items-center rounded-lg border border-zinc-300 px-3 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+                  className="inline-flex h-10 items-center justify-center rounded-xl border border-zinc-300 px-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
                 >
                   View details
                 </Link>
@@ -131,7 +131,7 @@ export default function ProfileProjects({
                     linkId={p.id}
                     profileId={profileId}
                     href={p.website || p.url || '#'}
-                    className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline"
+                    className="inline-flex min-w-0 items-center justify-center truncate text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline"
                   >
                     Visit {websiteLabel || 'website'}
                   </TrackedLink>

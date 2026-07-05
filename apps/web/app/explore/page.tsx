@@ -17,7 +17,7 @@ import ProjectCard from "@/components/projects/ProjectCard";
 import { Separator } from '@/components/ui/Separator';
 import PremiumPresentationCard from '@/components/presentation/PremiumPresentationCard';
 import UserMiniCard from '@/components/explorer/UserMiniCard';
-import { Building2, Search, SlidersHorizontal, UsersRound } from "lucide-react";
+import { Building2, Search, SlidersHorizontal, UsersRound, X } from "lucide-react";
 
 const CATEGORY_OPTIONS = [
     { v: "", l: "All categories" },
@@ -123,6 +123,7 @@ export default function ExplorePage() {
     const [projects, setProjects] = useState<ProjectLite[]>([]);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
     const [me, setMe] = useState<{
         id: number; userId: number; username: string | null;
@@ -228,6 +229,22 @@ export default function ExplorePage() {
     const canPrev = parsed.page > 1;
     const canNext = parsed.page * parsed.pageSize < total;
     const goPage = (nextPage: number) => pushQS({ page: nextPage });
+    const activeSortLabel =
+        mode === "profiles"
+            ? parsed.sortP === "followers"
+                ? "Most followers"
+                : parsed.sortP === "oldest"
+                    ? "Oldest"
+                    : "Newest"
+            : parsed.sortJ === "popular"
+                ? "Popular"
+                : parsed.sortJ === "started"
+                    ? "Recently started"
+                    : parsed.sortJ === "a-z"
+                        ? "A-Z"
+                        : parsed.sortJ === "z-a"
+                            ? "Z-A"
+                            : "Recently joined";
     
     return (
         <div className="min-h-screen rounded-t-[2rem] bg-[radial-gradient(circle_at_top_left,rgba(29,78,216,0.10),transparent_28%),linear-gradient(180deg,rgba(239,246,255,0.85),rgba(255,255,255,0.95)_38%,rgba(248,250,252,0.95))] py-4 sm:py-6">
@@ -280,29 +297,29 @@ export default function ExplorePage() {
                     )}
                 </aside>
 
-                <section className="space-y-4  ">
+                <section className="min-w-0 space-y-3 lg:space-y-4">
                     
-                    <div className="sticky top-16 z-30 space-y-3 rounded-b-3xl bg-blue-50/70 pb-3 pt-2 backdrop-blur-xl lg:top-20">
-                        <div className="rounded-3xl border border-blue-100 bg-white/85 px-4 py-4 shadow-sm shadow-blue-950/5 backdrop-blur sm:px-5">
-                            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                                <div className="flex flex-col gap-3 md:flex-row md:items-center">
+                    <div className="sticky top-16 z-30 space-y-2 rounded-b-3xl bg-blue-50/80 pb-2 pt-1.5 backdrop-blur-xl lg:top-20 lg:space-y-3 lg:pb-3 lg:pt-2">
+                        <div className="rounded-2xl border border-blue-100 bg-white/90 px-3 py-2.5 shadow-sm shadow-blue-950/5 backdrop-blur sm:px-4 lg:rounded-3xl lg:px-5 lg:py-4">
+                            <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+                                <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-3">
                                     <div className="flex items-start gap-3">
-                                        <div className="mt-1 hidden h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 text-white shadow-sm shadow-blue-950/20 sm:flex">
+                                        <div className="mt-1 hidden h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 text-white shadow-sm shadow-blue-950/20 lg:flex">
                                             <Search className="h-5 w-5" />
                                         </div>
-                                        <div>
-                                            <h1 className="text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
+                                        <div className="min-w-0">
+                                            <h1 className="text-lg font-semibold tracking-tight text-slate-950 sm:text-xl lg:text-2xl">
                                                 Explore
                                             </h1>
-                                            <p className="text-sm leading-6 text-slate-500">
+                                            <p className="hidden text-sm leading-6 text-slate-500 sm:block">
                                                 Discover people and businesses across your network
                                             </p>
                                         </div>
                                     </div>
 
-                                    <div className="inline-flex w-full rounded-2xl bg-blue-950/5 p-1 ring-1 ring-blue-100 sm:w-auto">
+                                    <div className="inline-flex w-full rounded-2xl bg-blue-950/5 p-1 ring-1 ring-blue-100 lg:w-auto">
                                         <button
-                                            className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition sm:flex-none ${mode === "profiles"
+                                            className={`inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl px-3 text-xs font-semibold transition sm:text-sm lg:flex-none lg:px-4 ${mode === "profiles"
                                                     ? "bg-white text-blue-700 shadow-sm"
                                                     : "text-slate-600 hover:text-slate-950"
                                                 }`}
@@ -312,7 +329,7 @@ export default function ExplorePage() {
                                             Individuals
                                         </button>
                                         <button
-                                            className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition sm:flex-none ${mode === "business"
+                                            className={`inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl px-3 text-xs font-semibold transition sm:text-sm lg:flex-none lg:px-4 ${mode === "business"
                                                     ? "bg-white text-blue-700 shadow-sm"
                                                     : "text-slate-600 hover:text-slate-950"
                                                 }`}
@@ -326,10 +343,23 @@ export default function ExplorePage() {
 
                                 
                             </div>
+                            <div className="mt-2 flex items-center justify-between gap-2 lg:hidden">
+                                <div className="min-w-0 truncate text-xs font-medium text-slate-600">
+                                    {mode === "profiles" ? "Individuals" : "Businesses"} · {total} results · {activeSortLabel}
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setMobileFiltersOpen((open) => !open)}
+                                    className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl border border-blue-100 bg-white px-3 text-xs font-semibold text-blue-700 shadow-sm"
+                                >
+                                    {mobileFiltersOpen ? <X className="h-3.5 w-3.5" /> : <SlidersHorizontal className="h-3.5 w-3.5" />}
+                                    Filters
+                                </button>
+                            </div>
                         </div>
 
                         {mode === "profiles" ? (
-                            <div className="rounded-3xl border border-blue-100 bg-white/90 p-3 shadow-sm shadow-blue-950/5 backdrop-blur sm:p-4">
+                            <div className="hidden rounded-3xl border border-blue-100 bg-white/90 p-3 shadow-sm shadow-blue-950/5 backdrop-blur sm:p-4 lg:block">
                                 <div className="flex flex-wrap gap-2">
                                     <SortChip label="Newest" active={parsed.sortP === "newest"} onClick={() => pushQS({ sort: "newest" })} />
                                     <SortChip label="Oldest" active={parsed.sortP === "oldest"} onClick={() => pushQS({ sort: "oldest" })} />
@@ -337,7 +367,7 @@ export default function ExplorePage() {
                                 </div>
                             </div>
                         ) : (
-                            <div className="rounded-3xl border border-blue-100 bg-white/90 p-3 shadow-sm shadow-blue-950/5 backdrop-blur sm:p-4">
+                            <div className="hidden rounded-3xl border border-blue-100 bg-white/90 p-3 shadow-sm shadow-blue-950/5 backdrop-blur sm:p-4 lg:block">
                                 <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                                     <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                                         <SlidersHorizontal className="h-4 w-4 text-blue-600" />
@@ -370,6 +400,46 @@ export default function ExplorePage() {
                                 </div>
                             </div>
                         )}
+                        {mobileFiltersOpen ? (
+                            <div className="rounded-2xl border border-blue-100 bg-white/95 p-3 shadow-lg shadow-blue-950/10 backdrop-blur lg:hidden">
+                                {mode === "profiles" ? (
+                                    <div className="space-y-3">
+                                        <div className="flex flex-wrap gap-2">
+                                            <SortChip label="Newest" active={parsed.sortP === "newest"} onClick={() => pushQS({ sort: "newest" })} />
+                                            <SortChip label="Oldest" active={parsed.sortP === "oldest"} onClick={() => pushQS({ sort: "oldest" })} />
+                                            <SortChip label="Most Followers" active={parsed.sortP === "followers"} onClick={() => pushQS({ sort: "followers" })} />
+                                        </div>
+                                        <FiltersCard />
+                                    </div>
+                                ) : (
+                                    <div className="grid gap-3">
+                                        <select
+                                            className="h-10 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                                            value={parsed.category}
+                                            onChange={(e) => pushQS({ pcat: e.target.value })}
+                                        >
+                                            {CATEGORY_OPTIONS.map((o) => (
+                                                <option key={o.v} value={o.v}>
+                                                    {o.l}
+                                                </option>
+                                            ))}
+                                        </select>
+
+                                        <select
+                                            className="h-10 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                                            value={parsed.sortJ}
+                                            onChange={(e) => pushQS({ psort: e.target.value })}
+                                        >
+                                            <option value="popular">Popular</option>
+                                            <option value="recent">Recently Join</option>
+                                            <option value="started">Recently started</option>
+                                            <option value="a-z">A-Z</option>
+                                            <option value="z-a">Z-A</option>
+                                        </select>
+                                    </div>
+                                )}
+                            </div>
+                        ) : null}
                     </div>
                     {loading ? (
                         <div className="rounded-3xl border border-blue-100 bg-white/90 p-6 text-sm text-slate-600 shadow-sm shadow-blue-950/5">

@@ -100,7 +100,7 @@ export default function ProjectCard({ project, onFollowChange, plan }: Props) {
     }
 
     return (
-        <div className="group overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-sm shadow-blue-950/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md hover:shadow-emerald-950/10">
+        <div className="group w-full min-w-0 overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-sm shadow-blue-950/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md hover:shadow-emerald-950/10">
             <div className="h-1 bg-gradient-to-r from-slate-900 via-blue-700 to-emerald-400" />
             <Link href={projectHref} className="block">
                 {project.coverImageUrl ? (
@@ -108,7 +108,7 @@ export default function ProjectCard({ project, onFollowChange, plan }: Props) {
                         <img
                             src={project.coverImageUrl}
                             alt={project.title}
-                            className="h-52 w-full select-none object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                            className="h-40 w-full select-none object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] sm:h-52"
                         />
                         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
                     </div>
@@ -133,16 +133,16 @@ export default function ProjectCard({ project, onFollowChange, plan }: Props) {
                 )}
             </Link>
 
-            <div className="p-5">
+            <div className="min-w-0 p-4 sm:p-5">
                 <div className="flex flex-wrap gap-2">
                     {project.category ? (
-                        <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+                        <span className="max-w-full truncate rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
                             {project.category}
                         </span>
                     ) : null}
 
                     {project.targetIndustry ? (
-                        <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-medium text-violet-700">
+                        <span className="max-w-full truncate rounded-full bg-violet-50 px-3 py-1 text-xs font-medium text-violet-700">
                             {project.targetIndustry}
                         </span>
                     ) : null}
@@ -157,12 +157,12 @@ export default function ProjectCard({ project, onFollowChange, plan }: Props) {
                 </div>
 
                 <div className="mt-4">
-                    <h3 className="line-clamp-1 text-base font-semibold tracking-tight text-slate-950 transition group-hover:text-emerald-700 sm:text-lg">
+                    <h3 className="line-clamp-2 break-words text-base font-semibold tracking-tight text-slate-950 transition group-hover:text-emerald-700 sm:line-clamp-1 sm:text-lg">
                         {project.title}
                     </h3>
 
                     {project.bio ? (
-                        <p className="mt-2 line-clamp-2 text-sm leading-6 text-zinc-600">
+                        <p className="mt-2 line-clamp-2 break-words text-sm leading-6 text-zinc-600">
                             {project.bio}
                         </p>
                     ) : (
@@ -235,7 +235,7 @@ export default function ProjectCard({ project, onFollowChange, plan }: Props) {
 
                 <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
                     <Link
-                        className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                        className="inline-flex h-10 min-w-0 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 sm:h-11"
                         href={projectHref}
                     >
                         <ExternalLink className="mr-2 h-4 w-4" />
@@ -246,7 +246,7 @@ export default function ProjectCard({ project, onFollowChange, plan }: Props) {
                         onClick={toggleFollow}
                         disabled={busy || !token}
                         title={!token ? "Sign in required" : ""}
-                        className={`inline-flex min-h-11 items-center justify-center rounded-2xl px-4 py-2 text-sm font-semibold transition ${isFollowing
+                        className={`inline-flex h-10 min-w-0 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition sm:h-11 ${isFollowing
                                 ? "bg-blue-700 text-white hover:bg-blue-800"
                                 : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
                             } disabled:cursor-not-allowed disabled:opacity-60`}

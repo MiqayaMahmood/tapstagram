@@ -27,10 +27,10 @@ export default function ProfileHero({ profile }: { profile: P }) {
     
 
     return (
-        <div className="overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-sm shadow-blue-950/5">
+        <div className="w-full min-w-0 overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-sm shadow-blue-950/5">
             <div className="h-1 bg-gradient-to-r from-blue-700 via-cyan-500 to-emerald-400" />
             {/* Cover */}
-            <div className="relative h-40 md:h-48 ">
+            <div className="relative h-32 sm:h-40 md:h-48">
                 {profile.hero_banner_url ? (
                     <img
                         src={profile.hero_banner_url}
@@ -43,7 +43,7 @@ export default function ProfileHero({ profile }: { profile: P }) {
             </div>
 
             {/* Content */}
-            <div className="px-4 pb-4">
+            <div className="min-w-0 px-4 pb-4">
                 {/* Avatar only overlaps */}
                 <div className="-mt-14 relative z-10">
                     <div className="h-24 w-24 overflow-hidden rounded-full border-4 border-white bg-slate-100 shadow-lg shadow-blue-950/10 ring-1 ring-blue-100 sm:h-28 sm:w-28">
@@ -64,19 +64,19 @@ export default function ProfileHero({ profile }: { profile: P }) {
                 {/* Main info starts below header/avatar */}
                 <div className="pt-4">
                     {profile.name && (
-                        <h1 className="truncate text-xl font-bold tracking-tight text-slate-950 md:text-2xl">
+                        <h1 className="break-words text-xl font-bold tracking-tight text-slate-950 md:text-2xl">
                             {profile.name}
                         </h1>
                     )}
 
                     {profile.title && (
-                        <div className="truncate pt-1 text-sm text-slate-700 md:text-base">
+                        <div className="break-words pt-1 text-sm text-slate-700 md:text-base">
                             {profile.title}
                         </div>
                     )}
 
                     {profile.location && (
-                        <div className="truncate pt-1 text-sm text-slate-600 md:text-base">
+                        <div className="break-words pt-1 text-sm text-slate-600 md:text-base">
                             {profile.location}
                         </div>
                     )}

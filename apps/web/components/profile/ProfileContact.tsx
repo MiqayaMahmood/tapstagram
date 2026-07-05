@@ -3,25 +3,25 @@ import React from 'react';
 
 function CopyBtn({ text }: { text: string }) {
     const copy = async () => { try { await navigator.clipboard.writeText(text); } catch { } };
-    return <button onClick={copy} className="text-sm border rounded-xl border-zinc-400 px-4 py-1">Copy</button>;
+    return <button onClick={copy} className="h-9 rounded-xl border border-blue-100 px-3 text-sm font-medium">Copy</button>;
 }
 
 export default function ProfileContact({ email, phone }: { email: string | null; phone: string | null }) {
     if (!email && !phone) {
-        return <div className="border rounded-2xl p-4 bg-white text-sm text-gray-500">No contact info.</div>;
+        return <div className="rounded-2xl border border-blue-100 bg-white p-4 text-sm text-gray-500">No contact info.</div>;
     }
     return (
-        <div className="border rounded-xl border-zinc-400 p-4 bg-white">
+        <div className="min-w-0 rounded-2xl border border-blue-100 bg-white p-4">
             <div className="font-bold mb-2">Contact</div>
-            <div className="space-y-2 text-lg">
+            <div className="space-y-2 text-sm md:text-base">
                 {email && (
-                    <div className="flex items-center justify-between">
+                    <div className="flex min-w-0 items-center justify-between gap-2">
                         <span className="truncate">📧 {email}</span>
                         <CopyBtn text={email} />
                     </div>
                 )}
                 {phone && (
-                    <div className="flex items-center justify-between">
+                    <div className="flex min-w-0 items-center justify-between gap-2">
                         <span className="truncate">📱 {phone}</span>
                         <CopyBtn text={phone} />
                     </div>
