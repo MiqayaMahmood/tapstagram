@@ -1,6 +1,11 @@
 import { SourceBadge } from "@/components/ui/SourceBadge";
 
 export function LeadsTable({ leads }: any) {
+    const displayName = (lead: any) =>
+        lead.name || [lead.firstName, lead.lastName].filter(Boolean).join(" ") || "Unknown";
+    const displayEmail = (lead: any) => lead.email || lead.contactEmail || "-";
+    const requestType = (message?: string) => message?.match(/^Request Type:\s*(.+)$/m)?.[1];
+
     return (
         <div className="overflow-hidden rounded-xl border border-zinc-400 bg-white shadow-sm">
             <table className="w-full text-sm">
@@ -18,9 +23,16 @@ export function LeadsTable({ leads }: any) {
                     {leads && leads.length > 0 ? (
                         leads.map((lead: any) => (
                             <tr key={lead.id} className="border-t border-zinc-300">
-                                <td className="px-4 py-3 font-medium text-zinc-900">{lead.name}</td>
-                                <td className="text-zinc-700">{lead.email}</td>
-                                <td className="max-w-xs truncate text-zinc-600">{lead.message || "—"}</td>
+                                <td className="px-4 py-3 font-medium text-zinc-900">{displayName(lead)}</td>
+                                <td className="text-zinc-700">{displayEmail(lead)}</td>
+                                <td className="max-w-xs truncate text-zinc-600" title={lead.message || ""}>
+                                    {requestType(lead.message) ? (
+                                        <span className="mr-2 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700">
+                                            {requestType(lead.message)}
+                                        </span>
+                                    ) : null}
+                                    {lead.message || "-"}
+                                </td>
                                 <td><SourceBadge source={lead.source} /></td>
                                 <td className="text-zinc-500">
                                     {new Date(lead.createdAt).toLocaleDateString()}

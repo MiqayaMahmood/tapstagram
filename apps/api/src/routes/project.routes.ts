@@ -58,6 +58,17 @@ export async function projectRoutes(app: FastifyInstance) {
     app.delete("/projects/:id(\\d+)/social-links/:linkId", { preHandler: [app.authenticate] }, ctrl.deleteSocialLink);
     app.post("/projects/:id(\\d+)/social-links/reorder", { preHandler: [app.authenticate] }, ctrl.reorderSocialLinks);
 
+    // Service packages & scope
+    app.post("/projects/:id(\\d+)/packages", { preHandler: [app.authenticate] }, ctrl.createProjectPackage);
+    app.patch("/projects/:id(\\d+)/packages/:packageId", { preHandler: [app.authenticate] }, ctrl.updateProjectPackage);
+    app.delete("/projects/:id(\\d+)/packages/:packageId", { preHandler: [app.authenticate] }, ctrl.deleteProjectPackage);
+    app.patch("/projects/:id(\\d+)/scope", { preHandler: [app.authenticate] }, ctrl.updateProjectScope);
+
+    // Project journey milestones
+    app.post("/projects/:id(\\d+)/milestones", { preHandler: [app.authenticate] }, ctrl.createProjectMilestone);
+    app.patch("/projects/:id(\\d+)/milestones/:milestoneId", { preHandler: [app.authenticate] }, ctrl.updateProjectMilestone);
+    app.delete("/projects/:id(\\d+)/milestones/:milestoneId", { preHandler: [app.authenticate] }, ctrl.deleteProjectMilestone);
+
     // Tracking (public)
     app.post("/projects/:id(\\d+)/visit", ctrl.trackProjectVisit);
     app.get("/projects/r/:id(\\d+)/site", ctrl.redirectProjectSite);
@@ -84,4 +95,3 @@ export async function projectRoutes(app: FastifyInstance) {
     // (optional) one endpoint that returns everything for the sidebar
     app.get("/projects/me/quicklinks", { preHandler: app.authenticate }, ctrl.getMyQuickLinks);
 }
-

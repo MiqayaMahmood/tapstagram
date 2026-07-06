@@ -36,6 +36,33 @@ type ProjectDto = {
     status?: string | null;
     openFor?: unknown;
     collaborationNote?: string | null;
+    packages?: Array<{
+        id: number;
+        name: string;
+        description?: string | null;
+        price?: string | null;
+        timeline?: string | null;
+        deliverablesText?: string | null;
+        ctaLabel?: string | null;
+        ctaLink?: string | null;
+        isFeatured?: boolean;
+        sortOrder?: number | null;
+    }>;
+    scope?: {
+        includedText?: string | null;
+        excludedText?: string | null;
+        toolsText?: string | null;
+        timeline?: string | null;
+    } | null;
+    milestones?: Array<{
+        id: number;
+        type: string;
+        title: string;
+        description?: string | null;
+        date: string;
+        completed?: boolean;
+        sortOrder?: number | null;
+    }>;
     socialLinks?: Array<{ id: string; platform: string; label?: string | null; url: string; sort_order?: number | null }>;
     plan?: string | null;
 };
@@ -172,6 +199,9 @@ function mapProjectToInitial(p: ProjectDto, _plan: string) {
         status: p.status ?? null,
         openFor: p.openFor ?? [],
         collaborationNote: p.collaborationNote ?? '',
+        packages: p.packages ?? [],
+        scope: p.scope ?? null,
+        milestones: p.milestones ?? [],
 
         socialLinks: (p.socialLinks ?? []).map(l => ({
             id: l.id, // cuid string

@@ -154,6 +154,61 @@ const ReorderLinkIdsBody = z.object({
 
 const AddOneLinkBody = SocialLinkSchema.omit({ id: true, sort_order: true });
 
+const ProjectPackageBody = z.object({
+  name: z.string().min(1).max(120),
+  description: z.string().max(1000).optional().nullable(),
+  price: z.string().max(80).optional().nullable(),
+  timeline: z.string().max(120).optional().nullable(),
+  deliverablesText: z.string().max(5000).optional().nullable(),
+  ctaLabel: z.string().max(80).optional().nullable(),
+  ctaLink: z.string().max(500).optional().nullable(),
+  isFeatured: z.coerce.boolean().optional().default(false),
+  sortOrder: z.coerce.number().int().min(0).optional().default(0),
+});
+
+const ProjectScopeBody = z.object({
+  includedText: z.string().max(5000).optional().nullable(),
+  excludedText: z.string().max(5000).optional().nullable(),
+  toolsText: z.string().max(5000).optional().nullable(),
+  timeline: z.string().max(120).optional().nullable(),
+});
+
+const MilestoneType = z.enum([
+  "FOUNDED",
+  "PROTOTYPE",
+  "MVP",
+  "BETA",
+  "LAUNCHED",
+  "FIRST_CLIENT",
+  "100_USERS",
+  "1000_USERS",
+  "FUNDING",
+  "PARTNERSHIP",
+  "EXPANSION",
+  "VERSION_RELEASE",
+  "AWARD",
+  "OTHER",
+]);
+
+const ProjectMilestoneBody = z.object({
+  type: MilestoneType.default("OTHER"),
+  title: z.string().min(1).max(160),
+  description: z.string().max(2000).optional().nullable(),
+  date: z.coerce.date(),
+  completed: z.coerce.boolean().optional().default(true),
+  sortOrder: z.coerce.number().int().min(0).optional().default(0),
+});
+
+const PackageParams = z.object({
+  id: z.coerce.number().int().positive(),
+  packageId: z.coerce.number().int().positive(),
+});
+
+const MilestoneParams = z.object({
+  id: z.coerce.number().int().positive(),
+  milestoneId: z.coerce.number().int().positive(),
+});
+
 // -------------------- Helpers --------------------
 
 function ensureOwnedProject(req: FastifyRequest, project: { profile: { userId: number } }) {
@@ -250,7 +305,38 @@ export async function projectPublicViewById(req: FastifyRequest, reply: FastifyR
     console.log("//apps/api/src/controllers/project.controller.ts - projectPublicViewById - projectId: " + id)
     const project = await req.server.prisma.project.findUnique({
         where: { id },
-        include: { profile: { select: { id: true, userId: true, username: true, plan:true } }, socialLinks: { orderBy: { sort_order: "asc" } } },
+        include: {
+            profile: {
+                select: {
+                    id: true,
+                    userId: true,
+                    username: true,
+                    name: true,
+                    title: true,
+                    bio: true,
+                    profile_picture_url: true,
+                    location: true,
+                    plan:true,
+                    project: {
+                        where: { id: { not: id }, isPublished: true },
+                        orderBy: [{ sort_order: "asc" }, { updatedAt: "desc" }],
+                        take: 4,
+                        select: {
+                            id: true,
+                            title: true,
+                            slug: true,
+                            category: true,
+                            bio: true,
+                            coverImageUrl: true,
+                        },
+                    },
+                },
+            },
+            socialLinks: { orderBy: { sort_order: "asc" } },
+            packages: { orderBy: [{ isFeatured: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }] },
+            scope: true,
+            milestones: { orderBy: [{ date: "asc" }, { sortOrder: "asc" }, { createdAt: "asc" }] },
+        },
     });
     if (!project) return reply.code(404).send({ message: "Project not found" });
     //ensureOwnedProject(req, project as any);
@@ -266,7 +352,13 @@ export async function getProjectById(req: FastifyRequest, reply: FastifyReply) {
     console.log("//apps/api/src/controllers/project.controller.ts - getProjectById - projectId: " + id)
   const project = await req.server.prisma.project.findUnique({
     where: { id },
-      include: { profile: { select: { id: true, userId: true, username: true, plan: true } }, socialLinks: { orderBy: { sort_order: "asc" } } },
+      include: {
+          profile: { select: { id: true, userId: true, username: true, plan: true } },
+          socialLinks: { orderBy: { sort_order: "asc" } },
+          packages: { orderBy: [{ isFeatured: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }] },
+          scope: true,
+          milestones: { orderBy: [{ date: "asc" }, { sortOrder: "asc" }, { createdAt: "asc" }] },
+      },
   });
   if (!project) return reply.code(404).send({ message: "Project not found" });
   ensureOwnedProject(req, project as any);
@@ -589,6 +681,157 @@ export async function deleteSocialLink(req: FastifyRequest, reply: FastifyReply)
     return reply.code(404).send({ message: "Link not found" });
   }
   await req.server.prisma.projectSocialLink.delete({ where: { id: linkId } });
+  reply.send({ ok: true });
+}
+
+// ---------- Service Packages & Scope ----------
+
+export async function createProjectPackage(req: FastifyRequest, reply: FastifyReply) {
+  const { id } = IdParam.parse(req.params);
+  const data = ProjectPackageBody.parse(req.body);
+  const project = await loadOwnedProject(req, id);
+
+  const created = await req.server.prisma.projectPackage.create({
+    data: {
+      projectId: project.id,
+      name: data.name,
+      description: data.description ?? null,
+      price: data.price ?? null,
+      timeline: data.timeline ?? null,
+      deliverablesText: data.deliverablesText ?? null,
+      ctaLabel: data.ctaLabel ?? null,
+      ctaLink: data.ctaLink ?? null,
+      isFeatured: !!data.isFeatured,
+      sortOrder: data.sortOrder ?? 0,
+    },
+  });
+
+  reply.code(201).send(created);
+}
+
+export async function updateProjectPackage(req: FastifyRequest, reply: FastifyReply) {
+  const { id, packageId } = PackageParams.parse(req.params);
+  const data = ProjectPackageBody.parse(req.body);
+  const project = await loadOwnedProject(req, id);
+
+  const existing = await req.server.prisma.projectPackage.findUnique({ where: { id: packageId } });
+  if (!existing || existing.projectId !== project.id) {
+    return reply.code(404).send({ message: "Package not found" });
+  }
+
+  const updated = await req.server.prisma.projectPackage.update({
+    where: { id: packageId },
+    data: {
+      name: data.name,
+      description: data.description ?? null,
+      price: data.price ?? null,
+      timeline: data.timeline ?? null,
+      deliverablesText: data.deliverablesText ?? null,
+      ctaLabel: data.ctaLabel ?? null,
+      ctaLink: data.ctaLink ?? null,
+      isFeatured: !!data.isFeatured,
+      sortOrder: data.sortOrder ?? 0,
+    },
+  });
+
+  reply.send(updated);
+}
+
+export async function deleteProjectPackage(req: FastifyRequest, reply: FastifyReply) {
+  const { id, packageId } = PackageParams.parse(req.params);
+  const project = await loadOwnedProject(req, id);
+
+  const existing = await req.server.prisma.projectPackage.findUnique({ where: { id: packageId } });
+  if (!existing || existing.projectId !== project.id) {
+    return reply.code(404).send({ message: "Package not found" });
+  }
+
+  await req.server.prisma.projectPackage.delete({ where: { id: packageId } });
+  reply.send({ ok: true });
+}
+
+export async function updateProjectScope(req: FastifyRequest, reply: FastifyReply) {
+  const { id } = IdParam.parse(req.params);
+  const data = ProjectScopeBody.parse(req.body);
+  const project = await loadOwnedProject(req, id);
+
+  const scope = await req.server.prisma.projectScope.upsert({
+    where: { projectId: project.id },
+    create: {
+      projectId: project.id,
+      includedText: data.includedText ?? null,
+      excludedText: data.excludedText ?? null,
+      toolsText: data.toolsText ?? null,
+      timeline: data.timeline ?? null,
+    },
+    update: {
+      includedText: data.includedText ?? null,
+      excludedText: data.excludedText ?? null,
+      toolsText: data.toolsText ?? null,
+      timeline: data.timeline ?? null,
+    },
+  });
+
+  reply.send(scope);
+}
+
+// ---------- Project Milestones ----------
+
+export async function createProjectMilestone(req: FastifyRequest, reply: FastifyReply) {
+  const { id } = IdParam.parse(req.params);
+  const data = ProjectMilestoneBody.parse(req.body);
+  const project = await loadOwnedProject(req, id);
+
+  const created = await req.server.prisma.projectMilestone.create({
+    data: {
+      projectId: project.id,
+      type: data.type,
+      title: data.title,
+      description: data.description ?? null,
+      date: data.date,
+      completed: !!data.completed,
+      sortOrder: data.sortOrder ?? 0,
+    },
+  });
+
+  reply.code(201).send(created);
+}
+
+export async function updateProjectMilestone(req: FastifyRequest, reply: FastifyReply) {
+  const { id, milestoneId } = MilestoneParams.parse(req.params);
+  const data = ProjectMilestoneBody.parse(req.body);
+  const project = await loadOwnedProject(req, id);
+
+  const existing = await req.server.prisma.projectMilestone.findUnique({ where: { id: milestoneId } });
+  if (!existing || existing.projectId !== project.id) {
+    return reply.code(404).send({ message: "Milestone not found" });
+  }
+
+  const updated = await req.server.prisma.projectMilestone.update({
+    where: { id: milestoneId },
+    data: {
+      type: data.type,
+      title: data.title,
+      description: data.description ?? null,
+      date: data.date,
+      completed: !!data.completed,
+      sortOrder: data.sortOrder ?? 0,
+    },
+  });
+
+  reply.send(updated);
+}
+
+export async function deleteProjectMilestone(req: FastifyRequest, reply: FastifyReply) {
+  const { id, milestoneId } = MilestoneParams.parse(req.params);
+  const project = await loadOwnedProject(req, id);
+
+  const existing = await req.server.prisma.projectMilestone.findUnique({ where: { id: milestoneId } });
+  if (!existing || existing.projectId !== project.id) {
+    return reply.code(404).send({ message: "Milestone not found" });
+  }
+
+  await req.server.prisma.projectMilestone.delete({ where: { id: milestoneId } });
   reply.send({ ok: true });
 }
 

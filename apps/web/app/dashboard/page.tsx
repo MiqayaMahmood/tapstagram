@@ -29,6 +29,7 @@ import {
     ChartColumn,
     Share2,
     BriefcaseBusiness,
+    Sparkles,
     
 } from "lucide-react";
 
@@ -59,6 +60,26 @@ function profileHref(p?: ProjectViewData["profile"]) {
     if (p?.userId) return `/p/${p.userId}`;
 
     return EXPLORE_PATH;
+}
+
+function getProfileCompletion(me: Me) {
+    const checks = [
+        { done: !!me.name, label: "Add your name" },
+        { done: !!me.title, label: "Add a professional title" },
+        { done: !!me.bio, label: "Write a short bio" },
+        { done: !!me.email, label: "Add contact email" },
+        { done: !!me.phone, label: "Add phone number" },
+        { done: !!me.location, label: "Add location" },
+        { done: !!me.industry, label: "Add industry" },
+        { done: !!me.profile_picture_url, label: "Upload profile photo" },
+        { done: !!me.hero_banner_url, label: "Add banner image" },
+        { done: !!me.username, label: "Set public username" },
+    ];
+    const done = checks.filter((item) => item.done).length;
+    return {
+        score: Math.round((done / checks.length) * 100),
+        missing: checks.filter((item) => !item.done).map((item) => item.label),
+    };
 }
 
 export default function DashboardPage() {
@@ -200,6 +221,8 @@ export default function DashboardPage() {
                         <div className="bg-white border rounded-xl border-zinc-400 p-4 text-sm text-neutral-600">Loading…</div>
                     ) : (
                         <>
+                            <ProfileStrengthCard me={me} />
+
                             {/* Media */}
                             <DashboardSectionCard
                                 id="media"
@@ -323,6 +346,51 @@ export default function DashboardPage() {
             </div>
         </div>
         </div>
+    );
+}
+
+function ProfileStrengthCard({ me }: { me: Me }) {
+    const completion = getProfileCompletion(me);
+    const suggestions = completion.missing.slice(0, 4);
+
+    return (
+        <section className="rounded-3xl border border-blue-100 bg-gradient-to-br from-white via-blue-50/40 to-cyan-50/40 p-4 shadow-sm shadow-blue-950/5 sm:p-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
+                        <Sparkles className="h-5 w-5" />
+                    </div>
+                    <div>
+                        <h2 className="text-base font-semibold tracking-tight text-slate-950">
+                            Profile strength: {completion.score}%
+                        </h2>
+                        <p className="mt-1 text-sm leading-6 text-slate-500">
+                            Complete your profile to improve discovery and visitor trust.
+                        </p>
+                    </div>
+                </div>
+                <div className="text-sm font-semibold text-blue-700">{completion.score >= 80 ? "Strong" : "Needs attention"}</div>
+            </div>
+
+            <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-white ring-1 ring-blue-100">
+                <div
+                    className="h-full rounded-full bg-gradient-to-r from-blue-700 to-cyan-500 transition-all"
+                    style={{ width: `${completion.score}%` }}
+                />
+            </div>
+
+            {suggestions.length > 0 ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                    {suggestions.map((item) => (
+                        <span key={item} className="rounded-full border border-blue-100 bg-white px-3 py-1 text-xs font-semibold text-slate-600">
+                            {item}
+                        </span>
+                    ))}
+                </div>
+            ) : (
+                <p className="mt-4 text-sm text-emerald-700">Profile basics are complete.</p>
+            )}
+        </section>
     );
 }
 

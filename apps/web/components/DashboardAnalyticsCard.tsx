@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { getDashboardSummary } from '@/services/analytics';
 import { useAuth } from '@/context/AuthContext';
+import { BarChart3, ExternalLink, FolderKanban, MousePointerClick } from 'lucide-react';
 
 type Summary = {
     views7: number;
@@ -36,7 +37,6 @@ export default function DashboardAnalyticsCard() {
             try {
                 const res = await getDashboardSummary(token);
                 if (!cancelled) {
-                    // defensively coerce missing arrays
                     setData({
                         views7: res?.views7 ?? 0,
                         views30: res?.views30 ?? 0,
@@ -61,7 +61,7 @@ export default function DashboardAnalyticsCard() {
 
     if (err) {
         return (
-            <div className="border p-4 rounded text-sm text-red-600">
+            <div className="rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-700">
                 Analytics: {err}
             </div>
         );
@@ -69,54 +69,96 @@ export default function DashboardAnalyticsCard() {
 
     if (loading) {
         return (
-            <div className="border p-4 rounded text-sm">
-                Loading analytics…
+            <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4 text-sm text-slate-600">
+                Loading analytics...
             </div>
         );
     }
 
     return (
-        <div className="space-y-3">
-
-
-            <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-lg border p-3">
-                    <div className="text-xs text-gray-600">Views (7 days)</div>
-                    <div className="text-2xl font-bold">{data.views7}</div>
-                </div>
-                <div className="rounded-lg border p-3">
-                    <div className="text-xs text-gray-600">Views (30 days)</div>
-                    <div className="text-2xl font-bold">{data.views30}</div>
-                </div>
+        <div className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-2">
+                <MetricCard icon={BarChart3} label="Views (7 days)" value={data.views7} tone="blue" />
+                <MetricCard icon={MousePointerClick} label="Views (30 days)" value={data.views30} tone="cyan" />
             </div>
 
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <div className="text-sm font-medium mb-2">Top Social Links (30d)</div>
-                    <ul className="space-y-1 text-sm">
-                        {!data?.topSocial?.length && <li className="text-gray-500">No clicks yet</li>}
-                        {data?.topSocial?.map((s) => (
-                            <li key={s.id} className="flex justify-between gap-3">
-                                <span className="truncate">{s.platform_name || s.url || 'Social link'}</span>
-                                <span className="text-gray-600">{s.count}</span>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-
-                <div>
-                    <div className="text-sm font-medium mb-2">Top Projects (30d)</div>
-                    <ul className="space-y-1 text-sm">
-                        {!data?.topProjects?.length && <li className="text-gray-500">No clicks yet</li>}
-                        {data?.topProjects?.map((p) => (
-                            <li key={p.id} className="flex justify-between gap-3">
-                                <span className="truncate">{p.title || p.url || 'Project link'}</span>
-                                <span className="text-gray-600">{p.count}</span>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <RankedList
+                    icon={ExternalLink}
+                    title="Top Social Links (30d)"
+                    empty="No social clicks yet"
+                    items={data.topSocial.map((s) => ({
+                        id: s.id,
+                        label: s.platform_name || s.url || 'Social link',
+                        count: s.count,
+                    }))}
+                />
+                <RankedList
+                    icon={FolderKanban}
+                    title="Top Projects (30d)"
+                    empty="No project clicks yet"
+                    items={data.topProjects.map((p) => ({
+                        id: p.id,
+                        label: p.title || p.url || 'Project link',
+                        count: p.count,
+                    }))}
+                />
             </div>
+        </div>
+    );
+}
+
+function MetricCard({
+    icon: Icon,
+    label,
+    value,
+    tone,
+}: {
+    icon: React.ComponentType<{ className?: string }>;
+    label: string;
+    value: number;
+    tone: 'blue' | 'cyan';
+}) {
+    const toneClasses = tone === 'cyan' ? 'to-cyan-50/70 text-cyan-700' : 'to-blue-50/70 text-blue-700';
+    return (
+        <div className={`rounded-2xl border border-blue-100 bg-gradient-to-br from-white ${toneClasses} p-4`}>
+            <div className="flex items-center justify-between gap-3">
+                <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</div>
+                <Icon className="h-4 w-4" />
+            </div>
+            <div className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">{value}</div>
+        </div>
+    );
+}
+
+function RankedList({
+    icon: Icon,
+    title,
+    empty,
+    items,
+}: {
+    icon: React.ComponentType<{ className?: string }>;
+    title: string;
+    empty: string;
+    items: Array<{ id: number; label: string; count: number }>;
+}) {
+    return (
+        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900">
+                <Icon className="h-4 w-4 text-blue-700" />
+                {title}
+            </div>
+            <ul className="space-y-2 text-sm">
+                {!items.length ? (
+                    <li className="rounded-xl bg-slate-50 px-3 py-2 text-slate-500">{empty}</li>
+                ) : null}
+                {items.map((item) => (
+                    <li key={item.id} className="flex justify-between gap-3 rounded-xl bg-slate-50 px-3 py-2">
+                        <span className="truncate text-slate-700">{item.label}</span>
+                        <span className="font-semibold text-slate-900">{item.count}</span>
+                    </li>
+                ))}
+            </ul>
         </div>
     );
 }
