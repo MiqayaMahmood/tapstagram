@@ -229,6 +229,8 @@ model Project {
   packages        ProjectPackage[]
   scope           ProjectScope?
   milestones      ProjectMilestone[]
+  testimonials    ProjectTestimonial[]
+  metrics         ProjectMetric[]
 
   hasPremiumPresentation Boolean             @default(false)
   presentation           ProjectPresentation?
@@ -300,6 +302,40 @@ model ProjectMilestone {
 
   @@index([projectId])
   @@map("projectmilestone")
+}
+
+model ProjectTestimonial {
+  id         Int      @id @default(autoincrement())
+  projectId  Int
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name       String
+  company    String?
+  role       String?
+  quote      String   @db.Text
+  logoUrl    String?
+  rating     Int?
+  isFeatured Boolean  @default(false)
+  sortOrder  Int      @default(0) @map("sort_order")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([projectId])
+  @@map("projecttestimonial")
+}
+
+model ProjectMetric {
+  id          Int      @id @default(autoincrement())
+  projectId   Int
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  label       String
+  value       String
+  description String?  @db.Text
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([projectId])
+  @@map("projectmetric")
 }
 
 model Bookmark {

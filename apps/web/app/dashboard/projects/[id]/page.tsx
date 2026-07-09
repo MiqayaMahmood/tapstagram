@@ -63,6 +63,24 @@ type ProjectDto = {
         completed?: boolean;
         sortOrder?: number | null;
     }>;
+    testimonials?: Array<{
+        id: number;
+        name: string;
+        company?: string | null;
+        role?: string | null;
+        quote: string;
+        logoUrl?: string | null;
+        rating?: number | null;
+        isFeatured?: boolean;
+        sortOrder?: number | null;
+    }>;
+    metrics?: Array<{
+        id: number;
+        label: string;
+        value: string;
+        description?: string | null;
+        sortOrder?: number | null;
+    }>;
     socialLinks?: Array<{ id: string; platform: string; label?: string | null; url: string; sort_order?: number | null }>;
     plan?: string | null;
 };
@@ -202,6 +220,8 @@ function mapProjectToInitial(p: ProjectDto, _plan: string) {
         packages: p.packages ?? [],
         scope: p.scope ?? null,
         milestones: p.milestones ?? [],
+        testimonials: p.testimonials ?? [],
+        metrics: p.metrics ?? [],
 
         socialLinks: (p.socialLinks ?? []).map(l => ({
             id: l.id, // cuid string

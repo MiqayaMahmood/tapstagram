@@ -58,10 +58,10 @@ export default function ProjectHero({ project }: { project: P }) {
     }, [project.id]);
 
     return (
-        <div className="overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-sm shadow-blue-950/5">
+        <div className="overflow-hidden rounded-3xl border border-blue-100 bg-white/90 shadow-sm shadow-blue-950/5 backdrop-blur">
             <div className="h-1 bg-gradient-to-r from-slate-900 via-blue-700 to-emerald-400" />
             {/* Cover */}
-            <div className="relative h-44 sm:h-56 md:h-80">
+            <div className="relative h-44 sm:h-56 md:h-72">
                 {project.coverImageUrl ? (
                     <img
                         src={project.coverImageUrl}
@@ -89,8 +89,8 @@ export default function ProjectHero({ project }: { project: P }) {
             </div>
 
             {/* Header row */}
-            <div className="px-4 pb-4">
-                <div className="-mt-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4">
+            <div className="bg-gradient-to-br from-white via-white to-blue-50/40 px-4 pb-4 sm:px-5 sm:pb-5">
+                <div className="-mt-6 flex flex-col gap-3 rounded-3xl border border-white/80 bg-white/85 p-3 shadow-lg shadow-blue-950/10 backdrop-blur sm:flex-row sm:items-end sm:gap-4 sm:p-4">
                     {/* Avatar */}
                     <div className="shrink-0 z-10">
                         {project.profile_picture_url ? (
@@ -106,11 +106,25 @@ export default function ProjectHero({ project }: { project: P }) {
 
                     {/* Name and basics */}
                     <div className="z-10 min-w-0 flex-1 space-y-2">
-                        {project.targetIndustry && <h1 className="break-words text-xl font-bold tracking-tight text-slate-950 md:text-2xl">{project.targetIndustry}</h1>}
-                        {project.title && <div className="break-words text-sm text-slate-700 md:text-base">{project.title}</div>}
-                        {project.country && <div className="break-words text-sm text-slate-600">{project.country}</div>}
+                        {project.title && <h1 className="break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl md:text-4xl">{project.title}</h1>}
+                        {(project.targetIndustry || project.bio || project.description) && (
+                            <p className="max-w-3xl break-words text-sm leading-6 text-slate-600 md:text-base">
+                                {project.targetIndustry || project.bio || project.description}
+                            </p>
+                        )}
                         <div className="flex flex-wrap items-center gap-2">
                             <ProjectStatusBadge status={project.status} compact />
+                            {project.category ? (
+                                <span className="inline-flex items-center rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-700">
+                                    {project.category}
+                                </span>
+                            ) : null}
+                            {(project.city || project.country) ? (
+                                <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600">
+                                    <MapPin className="h-3 w-3" />
+                                    {[project.city, project.country].filter(Boolean).join(", ")}
+                                </span>
+                            ) : null}
                             {updatedLabel ? (
                                 <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600">
                                     <CalendarDays className="h-3 w-3" />
@@ -122,11 +136,6 @@ export default function ProjectHero({ project }: { project: P }) {
                             <b>{followers}</b> followers · <b>{following}</b> following
                         </div>
                         <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-                            {project.category ? (
-                                <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${project.coverImageUrl ? "bg-white/20" : "bg-blue-50 text-blue-700"}`}>
-                                    {project.category}
-                                </span>
-                            ) : null}
                             {project.isPublished ? (
                                 <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${project.coverImageUrl ? "bg-emerald-500/80 text-white" : "bg-emerald-100 text-emerald-700"}`}>
                                     <CheckCircle className="h-3.5 w-3.5" />
@@ -139,8 +148,8 @@ export default function ProjectHero({ project }: { project: P }) {
                             )}
 
                             {stats && (
-                                <div className={`mt-2 text-xs ${project.coverImageUrl ? "text-white/90" : "text-slate-600"}`}>
-                                    {stats.visits} visits • {stats.social.reduce((a, b) => a + b.count, 0)} social clicks
+                                <div className="mt-2 text-xs text-slate-600">
+                                    {stats.visits} visits · {stats.social.reduce((a, b) => a + b.count, 0)} social clicks
                                 </div>
                             )}
 

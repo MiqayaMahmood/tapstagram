@@ -69,6 +69,14 @@ export async function projectRoutes(app: FastifyInstance) {
     app.patch("/projects/:id(\\d+)/milestones/:milestoneId", { preHandler: [app.authenticate] }, ctrl.updateProjectMilestone);
     app.delete("/projects/:id(\\d+)/milestones/:milestoneId", { preHandler: [app.authenticate] }, ctrl.deleteProjectMilestone);
 
+    // Testimonials & metrics
+    app.post("/projects/:id(\\d+)/testimonials", { preHandler: [app.authenticate] }, ctrl.createProjectTestimonial);
+    app.patch("/projects/:id(\\d+)/testimonials/:testimonialId", { preHandler: [app.authenticate] }, ctrl.updateProjectTestimonial);
+    app.delete("/projects/:id(\\d+)/testimonials/:testimonialId", { preHandler: [app.authenticate] }, ctrl.deleteProjectTestimonial);
+    app.post("/projects/:id(\\d+)/metrics", { preHandler: [app.authenticate] }, ctrl.createProjectMetric);
+    app.patch("/projects/:id(\\d+)/metrics/:metricId", { preHandler: [app.authenticate] }, ctrl.updateProjectMetric);
+    app.delete("/projects/:id(\\d+)/metrics/:metricId", { preHandler: [app.authenticate] }, ctrl.deleteProjectMetric);
+
     // Tracking (public)
     app.post("/projects/:id(\\d+)/visit", ctrl.trackProjectVisit);
     app.get("/projects/r/:id(\\d+)/site", ctrl.redirectProjectSite);

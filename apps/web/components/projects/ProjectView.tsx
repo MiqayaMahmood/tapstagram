@@ -305,6 +305,62 @@ function milestoneMeta(type?: string | null) {
     return map[type ?? "OTHER"] ?? map.OTHER;
 }
 
+function sectionSubtitle(text: string) {
+    return <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500">{text}</p>;
+}
+
+function LandingSection({
+    icon,
+    title,
+    subtitle,
+    children,
+    className = "",
+}: {
+    icon: React.ReactNode;
+    title: string;
+    subtitle?: string;
+    children: React.ReactNode;
+    className?: string;
+}) {
+    return (
+        <section className={`rounded-3xl border border-blue-100 bg-white/95 p-4 shadow-sm shadow-blue-950/5 backdrop-blur sm:p-5 ${className}`}>
+            <div className="mb-4 flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-700 ring-1 ring-blue-100">
+                    {icon}
+                </div>
+                <div className="min-w-0">
+                    <h2 className="break-words text-base font-semibold tracking-tight text-slate-950 sm:text-lg">{title}</h2>
+                    {subtitle ? sectionSubtitle(subtitle) : null}
+                </div>
+            </div>
+            {children}
+        </section>
+    );
+}
+
+function LandingCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+    return (
+        <div className={`min-w-0 rounded-2xl border border-blue-100 bg-gradient-to-br from-white to-blue-50/40 p-4 shadow-sm shadow-blue-950/5 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-blue-950/10 ${className}`}>
+            {children}
+        </div>
+    );
+}
+
+function compactDate(value?: string | null) {
+    if (!value) return null;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+    return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+}
+
+function yearsSince(value?: string | null) {
+    if (!value) return null;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+    const years = new Date().getFullYear() - date.getFullYear();
+    return years > 0 ? `${years}+` : "New";
+}
+
 export default function ProjectView({ project }: { project: ProjectViewData}) {
     const { token, user } = useAuth();
     const router = useRouter();
@@ -560,6 +616,23 @@ useEffect(() => {
         setCollaborationSending(false);
     };
 
+    const projectForHero = {
+        ...project,
+        profile_picture_url: project.profile_picture_url ?? creator?.profile_picture_url ?? null,
+    };
+    const quickStats = [
+        creatorProjects.length > 0 ? { label: "Projects", value: `${creatorProjects.length + 1}`, Icon: FolderKanban } : null,
+        project.followersCount !== undefined ? { label: "Followers", value: `${project.followersCount ?? 0}`, Icon: Users } : null,
+        project.bookmarksCount !== undefined ? { label: "Bookmarks", value: `${project.bookmarksCount ?? 0}`, Icon: CheckCircle } : null,
+        stats?.visits !== undefined ? { label: "Views", value: `${stats.visits ?? 0}`, Icon: BarChart3 } : null,
+        yearsSince(startedOn) ? { label: "Years", value: yearsSince(startedOn) as string, Icon: CalendarDays } : null,
+        country ? { label: "Country", value: country, Icon: MapPin } : null,
+    ].filter(Boolean) as Array<{ label: string; value: string; Icon: React.ComponentType<{ className?: string }> }>;
+    const trustedBy = testimonials
+        .filter((item) => item.company || item.logoUrl || item.name)
+        .slice(0, 6);
+    const showGalleryDetails = Boolean(coverImageUrl || longDescription || description || socialLinks.length || tags?.length);
+
   return (
       <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
           <div className="min-w-0">
@@ -601,832 +674,271 @@ useEffect(() => {
                   </nav>
               </div>
 
-              {/* top header */}
-              <ProjectHero project={project} />
-              <Card className="mt-4 rounded-3xl border border-blue-100 shadow-sm shadow-blue-950/5">
-                  <CardHeader className="pb-3">
-                      <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
-                              <MousePointerClick className="h-5 w-5" />
-                          </div>
-                          Take Action
-                      </CardTitle>
-                  </CardHeader>
-                  <CardContent>
+              {/* Premium business landing page */}
+              <div className="space-y-4">
+                  <ProjectHero project={projectForHero} />
+
+                  {quickStats.length > 0 ? (
+                      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+                          {quickStats.map(({ label, value, Icon }) => (
+                              <div key={label} className="flex min-w-0 items-center gap-3 rounded-2xl border border-blue-100 bg-white/90 p-3 shadow-sm shadow-blue-950/5 backdrop-blur">
+                                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700 ring-1 ring-blue-100">
+                                      <Icon className="h-4 w-4" />
+                                  </div>
+                                  <div className="min-w-0">
+                                      <div className="truncate text-sm font-semibold text-slate-950">{value}</div>
+                                      <div className="truncate text-[11px] font-medium uppercase tracking-wide text-slate-500">{label}</div>
+                                  </div>
+                              </div>
+                          ))}
+                      </div>
+                  ) : null}
+
+                  <LandingSection icon={<MousePointerClick className="h-5 w-5" />} title="Take Action" subtitle="Choose the best next step for this project or business." className="bg-gradient-to-br from-white via-white to-blue-50/50">
                       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                           {projectCtas.map((cta, index) => {
                               const href = cta.url ? normalizeHref(cta.url) : "#";
                               return (
-                                  <a
-                                      key={cta.id ?? `${cta.label}-${index}`}
-                                      href={href}
-                                      target={href.startsWith("http") ? "_blank" : undefined}
-                                      rel={href.startsWith("http") ? "noreferrer" : undefined}
-                                      className={`inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-2xl px-4 text-sm font-semibold transition sm:h-11 ${
-                                          cta.isPrimary
-                                              ? "bg-blue-700 text-white shadow-sm shadow-blue-950/15 hover:bg-blue-800"
-                                              : "border border-blue-100 bg-white text-slate-700 hover:bg-blue-50"
-                                      }`}
-                                  >
+                                  <a key={cta.id ?? `${cta.label}-${index}`} href={href} target={href.startsWith("http") ? "_blank" : undefined} rel={href.startsWith("http") ? "noreferrer" : undefined} className={`inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-2xl px-4 text-sm font-semibold transition sm:h-11 ${cta.isPrimary ? "bg-blue-700 text-white shadow-sm shadow-blue-950/15 hover:bg-blue-800" : "border border-blue-100 bg-white text-slate-700 hover:bg-blue-50"}`}>
                                       <ExternalLink className="h-4 w-4 shrink-0" />
                                       <span className="truncate">{cta.label}</span>
                                   </a>
                               );
                           })}
-
-                          {website ? (
-                              <a
-                                  href={normalizeHref(website)}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 sm:h-11"
-                              >
-                                  <Globe className="h-4 w-4 shrink-0" />
-                                  <span className="truncate">Visit Website</span>
-                              </a>
-                          ) : null}
-
-                          <button
-                              type="button"
-                              onClick={() => openLeadWithIntent("General Inquiry")}
-                              className="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-blue-50 sm:h-11"
-                          >
-                              <MessageCircleMore className="h-4 w-4 shrink-0" />
-                              <span className="truncate">Contact</span>
-                          </button>
-
-                          {canRequestCollaboration ? (
-                              <button
-                                  type="button"
-                                  onClick={() => openCollaborationRequest("COLLABORATION")}
-                                  className="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-2xl bg-blue-700 px-4 text-sm font-semibold text-white transition hover:bg-blue-800 sm:h-11"
-                              >
-                                  <BriefcaseBusiness className="h-4 w-4 shrink-0" />
-                                  <span className="truncate">Request Collaboration</span>
-                              </button>
-                          ) : null}
-
-                          <button
-                              type="button"
-                              onClick={() => openLeadWithIntent("Proposal")}
-                              className="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-blue-50 sm:h-11"
-                          >
-                              <FileText className="h-4 w-4 shrink-0" />
-                              <span className="truncate">Request Proposal</span>
-                          </button>
-
-                          <button
-                              type="button"
-                              onClick={() => openLeadWithIntent("Demo Request")}
-                              className="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-blue-50 sm:h-11"
-                          >
-                              <MessageSquareText className="h-4 w-4 shrink-0" />
-                              <span className="truncate">Request Demo</span>
-                          </button>
-
-                          {brochures[0] ? (
-                              <a
-                                  href={brochures[0].fileUrl ?? brochures[0].url ?? "#"}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  download
-                                  className="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 text-sm font-semibold text-blue-700 transition hover:bg-blue-100 sm:h-11"
-                              >
-                                  <FileDown className="h-4 w-4 shrink-0" />
-                                  <span className="truncate">Download Brochure</span>
-                              </a>
-                          ) : null}
-
-                          {contactPhone ? (
-                              <a
-                                  href={`tel:${contactPhone}`}
-                                  className="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-blue-50 sm:h-11"
-                              >
-                                  <PhoneCall className="h-4 w-4 shrink-0" />
-                                  <span className="truncate">Call</span>
-                              </a>
-                          ) : null}
-
-                          {contactEmail ? (
-                              <a
-                                  href={`mailto:${contactEmail}`}
-                                  className="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-blue-50 sm:h-11"
-                              >
-                                  <Mail className="h-4 w-4 shrink-0" />
-                                  <span className="truncate">Email</span>
-                              </a>
-                          ) : null}
+                          {website ? <a href={normalizeHref(website)} target="_blank" rel="noreferrer" className="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 sm:h-11"><Globe className="h-4 w-4 shrink-0" /><span className="truncate">Visit Website</span></a> : null}
+                          <button type="button" onClick={() => openLeadWithIntent("General Inquiry")} className="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-blue-50 sm:h-11"><MessageCircleMore className="h-4 w-4 shrink-0" /><span className="truncate">Contact</span></button>
+                          {canRequestCollaboration ? <button type="button" onClick={() => openCollaborationRequest("COLLABORATION")} className="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-2xl bg-blue-700 px-4 text-sm font-semibold text-white transition hover:bg-blue-800 sm:h-11"><BriefcaseBusiness className="h-4 w-4 shrink-0" /><span className="truncate">Request Collaboration</span></button> : null}
+                          <button type="button" onClick={() => openLeadWithIntent("Proposal")} className="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-blue-50 sm:h-11"><FileText className="h-4 w-4 shrink-0" /><span className="truncate">Request Proposal</span></button>
+                          <button type="button" onClick={() => openLeadWithIntent("Demo Request")} className="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-blue-50 sm:h-11"><MessageSquareText className="h-4 w-4 shrink-0" /><span className="truncate">Request Demo</span></button>
+                          {brochures[0] ? <a href={brochures[0].fileUrl ?? brochures[0].url ?? "#"} target="_blank" rel="noreferrer" download className="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 text-sm font-semibold text-blue-700 transition hover:bg-blue-100 sm:h-11"><FileDown className="h-4 w-4 shrink-0" /><span className="truncate">Download Brochure</span></a> : null}
+                          {contactPhone ? <a href={`tel:${contactPhone}`} className="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-blue-50 sm:h-11"><PhoneCall className="h-4 w-4 shrink-0" /><span className="truncate">Call</span></a> : null}
+                          {contactEmail ? <a href={`mailto:${contactEmail}`} className="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-blue-50 sm:h-11"><Mail className="h-4 w-4 shrink-0" /><span className="truncate">Email</span></a> : null}
                       </div>
-                  </CardContent>
-              </Card>
+                  </LandingSection>
 
-              {brochures.length > 0 ? (
-                  <Card className="mt-4 rounded-3xl border border-blue-100 shadow-sm shadow-blue-950/5">
-                      <CardHeader className="pb-3">
-                          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-100 text-cyan-700">
-                                  <FileText className="h-5 w-5" />
-                              </div>
-                              Brochure / Catalog
-                          </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                          <ul className="grid gap-3">
-                              {brochures.map((item, index) => {
-                                  const fileUrl = item.fileUrl ?? item.url ?? "#";
-                                  const fileName = item.fileName ?? item.filename ?? "PDF brochure";
-                                  return (
-                                      <li
-                                          key={item.id ?? `${fileUrl}-${index}`}
-                                          className="flex flex-col gap-3 rounded-2xl border border-blue-100 bg-blue-50/40 p-3 sm:flex-row sm:items-center sm:justify-between"
-                                      >
-                                          <div className="min-w-0">
-                                              <div className="truncate text-sm font-semibold text-slate-950">
-                                                  {item.title || "Brochure / Catalog"}
-                                              </div>
-                                              <div className="truncate text-xs text-slate-500">{fileName}</div>
-                                          </div>
-                                          <a
-                                              href={fileUrl}
-                                              target="_blank"
-                                              rel="noreferrer"
-                                              download
-                                              className="inline-flex h-10 items-center justify-center gap-2 rounded-2xl bg-blue-700 px-4 text-sm font-semibold text-white transition hover:bg-blue-800"
-                                          >
-                                              <FileDown className="h-4 w-4" />
-                                              Download
-                                          </a>
-                                      </li>
-                                  );
-                              })}
-                          </ul>
-                      </CardContent>
-                  </Card>
-              ) : null}
-              {metrics.length > 0 ? (
-                  <Card className="mt-4 rounded-3xl border border-blue-100 shadow-sm shadow-blue-950/5">
-                      <CardHeader className="pb-3">
-                          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
-                                  <BarChart3 className="h-5 w-5" />
-                              </div>
-                              Impact
-                          </CardTitle>
-                      </CardHeader>
-                      <CardContent>
+                  {(openForValues.length > 0 || collaborationNote) ? (
+                      <LandingSection
+                          icon={<Handshake className="h-5 w-5" />}
+                          title="Open For"
+                          subtitle="Business opportunities this project is currently open to discussing."
+                          className="bg-gradient-to-br from-white via-blue-50/50 to-white"
+                      >
+                          <div className="space-y-3">
+                              {openForValues.length > 0 ? <ProjectOpenForChips openFor={openForValues} /> : null}
+                              {collaborationNote ? <p className="text-sm leading-6 text-slate-600">{collaborationNote}</p> : null}
+                          </div>
+                      </LandingSection>
+                  ) : null}
+
+                  {trustedBy.length > 0 ? (
+                      <LandingSection icon={<Trophy className="h-5 w-5" />} title="Trusted By" subtitle="Signals from customers, partners, and supporters connected to this project.">
                           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                              {metrics.map((metric, index) => (
-                                  <div
-                                      key={metric.id ?? `${metric.label}-${index}`}
-                                      className="min-w-0 rounded-2xl border border-blue-100 bg-gradient-to-br from-white to-blue-50/60 p-4"
-                                  >
-                                      <div className="break-words text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
-                                          {metric.value}
+                              {trustedBy.map((item, index) => (
+                                  <LandingCard key={item.id ?? `${item.name}-${index}`} className="flex items-center gap-3">
+                                      {item.logoUrl ? <img src={item.logoUrl} alt="" className="h-11 w-11 shrink-0 rounded-xl border border-blue-100 object-cover" /> : <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-sm font-semibold text-blue-700">{initials(item.company ?? item.name)}</div>}
+                                      <div className="min-w-0">
+                                          <div className="truncate text-sm font-semibold text-slate-950">{item.company || item.name}</div>
+                                          {(item.role || item.name) ? <div className="truncate text-xs text-slate-500">{[item.role, item.name].filter(Boolean).join(" · ")}</div> : null}
                                       </div>
-                                      <div className="mt-1 text-sm font-semibold text-slate-700">{metric.label}</div>
-                                      {metric.description ? (
-                                          <p className="mt-2 text-sm leading-6 text-slate-500">{metric.description}</p>
-                                      ) : null}
-                                  </div>
+                                  </LandingCard>
                               ))}
                           </div>
-                      </CardContent>
-                  </Card>
-              ) : null}
+                      </LandingSection>
+                  ) : null}
 
-              {testimonials.length > 0 ? (
-                  <Card className="mt-4 rounded-3xl border border-blue-100 shadow-sm shadow-blue-950/5">
-                      <CardHeader className="pb-3">
-                          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700">
-                                  <Quote className="h-5 w-5" />
-                              </div>
-                              What people say
-                          </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                          <div className="grid gap-3 md:grid-cols-2">
-                              {testimonials.map((item, index) => {
-                                  const rating = Number(item.rating ?? 0);
-                                  return (
-                                      <figure
-                                          key={item.id ?? `${item.name}-${index}`}
-                                          className="min-w-0 rounded-2xl border border-blue-100 bg-white p-4 shadow-sm shadow-blue-950/5"
-                                      >
-                                          <div className="flex items-start gap-3">
-                                              {item.logoUrl ? (
-                                                  <img
-                                                      src={item.logoUrl}
-                                                      alt=""
-                                                      className="h-10 w-10 shrink-0 rounded-xl border border-slate-200 object-cover"
-                                                  />
-                                              ) : (
-                                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
-                                                      <Quote className="h-4 w-4" />
-                                                  </div>
-                                              )}
-                                              <div className="min-w-0">
-                                                  <figcaption className="text-sm font-semibold text-slate-950">
-                                                      {item.name}
-                                                  </figcaption>
-                                                  {(item.role || item.company) ? (
-                                                      <p className="truncate text-xs text-slate-500">
-                                                          {[item.role, item.company].filter(Boolean).join(" at ")}
-                                                      </p>
-                                                  ) : null}
-                                              </div>
-                                          </div>
-                                          {rating > 0 ? (
-                                              <div className="mt-3 flex items-center gap-1 text-amber-500">
-                                                  {Array.from({ length: Math.min(5, Math.max(1, Math.round(rating))) }).map((_, starIndex) => (
-                                                      <Star key={starIndex} className="h-3.5 w-3.5 fill-current" />
-                                                  ))}
-                                              </div>
-                                          ) : null}
-                                          <blockquote className="mt-3 break-words text-sm leading-6 text-slate-600">
-                                              "{item.quote}"
-                                          </blockquote>
-                                      </figure>
-                                  );
-                              })}
-                          </div>
-                      </CardContent>
-                  </Card>
-              ) : null}
-              {packages.length > 0 ? (
-                  <Card className="mt-4 rounded-3xl border border-blue-100 shadow-sm shadow-blue-950/5">
-                      <CardHeader className="pb-3">
-                          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
-                                  <Package className="h-5 w-5" />
-                              </div>
-                              Service Packages
-                          </CardTitle>
-                      </CardHeader>
-                      <CardContent>
+                  {packages.length > 0 ? (
+                      <LandingSection icon={<Package className="h-5 w-5" />} title="Service Packages" subtitle="Structured offerings that make the project easier to evaluate and buy.">
                           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                               {packages.map((packageItem, index) => {
                                   const deliverables = normalizeList(packageItem.deliverables ?? packageItem.deliverablesText);
                                   const ctaHref = packageItem.ctaLink ?? packageItem.ctaUrl;
                                   const featured = packageItem.isFeatured || packageItem.isPopular;
                                   return (
-                                      <div
-                                          key={packageItem.id ?? `${packageItem.name ?? packageItem.title}-${index}`}
-                                          className={`flex min-w-0 flex-col rounded-2xl border p-4 ${
-                                              featured
-                                                  ? "border-blue-200 bg-gradient-to-br from-blue-50 via-white to-cyan-50 shadow-sm shadow-blue-950/10"
-                                                  : "border-blue-100 bg-white"
-                                          }`}
-                                      >
+                                      <LandingCard key={packageItem.id ?? `${packageItem.name ?? packageItem.title}-${index}`} className={`flex flex-col ${featured ? "border-blue-200 from-blue-50 via-white to-cyan-50" : ""}`}>
                                           <div className="flex items-start justify-between gap-3">
                                               <div className="min-w-0">
-                                                  <h3 className="break-words text-base font-semibold text-slate-950">
-                                                      {packageItem.name ?? packageItem.title}
-                                                  </h3>
-                                                  {(packageItem.description || packageItem.shortDescription) ? (
-                                                      <p className="mt-2 text-sm leading-6 text-slate-600">
-                                                          {packageItem.description ?? packageItem.shortDescription}
-                                                      </p>
-                                                  ) : null}
+                                                  <h3 className="break-words text-base font-semibold text-slate-950">{packageItem.name ?? packageItem.title}</h3>
+                                                  {(packageItem.description || packageItem.shortDescription) ? <p className="mt-2 text-sm leading-6 text-slate-600">{packageItem.description ?? packageItem.shortDescription}</p> : null}
                                               </div>
-                                              {featured ? (
-                                                  <span className="shrink-0 rounded-full bg-blue-700 px-2.5 py-1 text-xs font-semibold text-white">
-                                                      Popular
-                                                  </span>
-                                              ) : null}
+                                              {featured ? <span className="shrink-0 rounded-full bg-blue-700 px-2.5 py-1 text-xs font-semibold text-white">Popular</span> : null}
                                           </div>
-
                                           {(packageItem.price || packageItem.timeline) ? (
                                               <div className="mt-4 grid gap-2 text-sm text-slate-600">
-                                                  {packageItem.price ? (
-                                                      <div className="rounded-xl bg-slate-50 px-3 py-2 font-semibold text-slate-950">
-                                                          {packageItem.price}
-                                                      </div>
-                                                  ) : null}
-                                                  {packageItem.timeline ? (
-                                                      <div className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2">
-                                                          <Clock className="h-4 w-4 text-blue-700" />
-                                                          {packageItem.timeline}
-                                                      </div>
-                                                  ) : null}
+                                                  {packageItem.price ? <div className="rounded-xl bg-white/80 px-3 py-2 font-semibold text-slate-950">{packageItem.price}</div> : null}
+                                                  {packageItem.timeline ? <div className="flex items-center gap-2 rounded-xl bg-white/80 px-3 py-2"><Clock className="h-4 w-4 text-blue-700" />{packageItem.timeline}</div> : null}
                                               </div>
                                           ) : null}
-
                                           {deliverables.length > 0 ? (
                                               <ul className="mt-4 grid gap-2 text-sm text-slate-600">
-                                                  {deliverables.map((item) => (
-                                                      <li key={item} className="flex min-w-0 items-start gap-2">
-                                                          <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                                                          <span className="break-words">{item}</span>
-                                                      </li>
-                                                  ))}
+                                                  {deliverables.map((item) => <li key={item} className="flex min-w-0 items-start gap-2"><CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" /><span className="break-words">{item}</span></li>)}
                                               </ul>
                                           ) : null}
-
-                                          {ctaHref ? (
-                                              <a
-                                                  href={normalizeHref(ctaHref)}
-                                                  target="_blank"
-                                                  rel="noreferrer"
-                                                  className="mt-4 inline-flex h-10 items-center justify-center rounded-2xl bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
-                                              >
-                                                  {packageItem.ctaLabel || "Get Started"}
-                                              </a>
-                                          ) : null}
-                                      </div>
+                                          {ctaHref ? <a href={normalizeHref(ctaHref)} target="_blank" rel="noreferrer" className="mt-4 inline-flex h-10 items-center justify-center rounded-2xl bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800">{packageItem.ctaLabel || "Get Started"}</a> : null}
+                                      </LandingCard>
                                   );
                               })}
                           </div>
-                      </CardContent>
-                  </Card>
-              ) : null}
+                      </LandingSection>
+                  ) : null}
 
-              {hasScope ? (
-                  <Card className="mt-4 rounded-3xl border border-blue-100 shadow-sm shadow-blue-950/5">
-                      <CardHeader className="pb-3">
-                          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-100 text-cyan-700">
-                                  <ListChecks className="h-5 w-5" />
-                              </div>
-                              Scope & Deliverables
-                          </CardTitle>
-                      </CardHeader>
-                      <CardContent>
+                  {hasScope ? (
+                      <LandingSection icon={<ListChecks className="h-5 w-5" />} title="Scope & Deliverables" subtitle="A clear view of what is included, what is out of scope, and how the work is delivered.">
                           <div className="grid gap-3 md:grid-cols-2">
-                              {scope.included.length > 0 ? (
-                                  <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4">
-                                      <h3 className="text-sm font-semibold text-slate-950">What's included</h3>
-                                      <ul className="mt-3 grid gap-2 text-sm text-slate-600">
-                                          {scope.included.map((item) => (
-                                              <li key={item} className="flex min-w-0 items-start gap-2">
-                                                  <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                                                  <span className="break-words">{item}</span>
-                                              </li>
-                                          ))}
-                                      </ul>
-                                  </div>
-                              ) : null}
-
-                              {scope.excluded.length > 0 ? (
-                                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                                      <h3 className="text-sm font-semibold text-slate-950">What's not included</h3>
-                                      <ul className="mt-3 grid gap-2 text-sm text-slate-600">
-                                          {scope.excluded.map((item) => (
-                                              <li key={item} className="break-words">{item}</li>
-                                          ))}
-                                      </ul>
-                                  </div>
-                              ) : null}
-
-                              {(scope.tools.length > 0 || scope.timeline) ? (
-                                  <div className="rounded-2xl border border-blue-100 bg-blue-50/40 p-4 md:col-span-2">
-                                      <h3 className="text-sm font-semibold text-slate-950">Tools & timeline</h3>
-                                      {scope.tools.length > 0 ? (
-                                          <div className="mt-3 flex flex-wrap gap-2">
-                                              {scope.tools.map((tool) => (
-                                                  <span key={tool} className="rounded-full border border-blue-100 bg-white px-3 py-1 text-xs font-semibold text-blue-700">
-                                                      {tool}
-                                                  </span>
-                                              ))}
-                                          </div>
-                                      ) : null}
-                                      {scope.timeline ? (
-                                          <p className="mt-3 flex items-center gap-2 text-sm text-slate-600">
-                                              <Clock className="h-4 w-4 text-blue-700" />
-                                              {scope.timeline}
-                                          </p>
-                                      ) : null}
-                                  </div>
-                              ) : null}
+                              {scope.included.length > 0 ? <LandingCard className="from-emerald-50/70 to-white"><h3 className="text-sm font-semibold text-slate-950">What's included</h3><ul className="mt-3 grid gap-2 text-sm text-slate-600">{scope.included.map((item) => <li key={item} className="flex min-w-0 items-start gap-2"><CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" /><span className="break-words">{item}</span></li>)}</ul></LandingCard> : null}
+                              {scope.excluded.length > 0 ? <LandingCard className="from-slate-50 to-white"><h3 className="text-sm font-semibold text-slate-950">What's not included</h3><ul className="mt-3 grid gap-2 text-sm text-slate-600">{scope.excluded.map((item) => <li key={item} className="break-words">{item}</li>)}</ul></LandingCard> : null}
+                              {(scope.tools.length > 0 || scope.timeline) ? <LandingCard className="md:col-span-2"><h3 className="text-sm font-semibold text-slate-950">Tools & timeline</h3>{scope.tools.length > 0 ? <div className="mt-3 flex flex-wrap gap-2">{scope.tools.map((tool) => <span key={tool} className="rounded-full border border-blue-100 bg-white px-3 py-1 text-xs font-semibold text-blue-700">{tool}</span>)}</div> : null}{scope.timeline ? <p className="mt-3 flex items-center gap-2 text-sm text-slate-600"><Clock className="h-4 w-4 text-blue-700" />{scope.timeline}</p> : null}</LandingCard> : null}
                           </div>
-                      </CardContent>
-                  </Card>
-              ) : null}
-              {/* SOCIAL LINKS */}
-              <Card className="mt-4 rounded-3xl border border-blue-100 shadow-sm shadow-blue-950/5">
-                  <CardHeader className="pb-3">
-                      <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-fuchsia-100 text-fuchsia-700">
-                              <Share2 className="h-5 w-5" />
-                          </div>
-                          Find us online
-                      </CardTitle>
-                  </CardHeader>
+                      </LandingSection>
+                  ) : null}
 
-                  <CardContent>
-                      {socialLinks.length === 0 ? (
-                          <p className="text-neutral-500">No social links added yet.</p>
-                      ) : (
-                          <ul className="flex flex-wrap gap-3">
-                              {socialLinks.map((l) => {
-                                  const Icon = PlatformIcon(l.platform);
-                                  const label = SOCIAL_PLATFORMS.find((p) => p.key === l.platform)?.label ?? l.platform;
-
+                  {testimonials.length > 0 ? (
+                      <LandingSection icon={<Quote className="h-5 w-5" />} title="Testimonials" subtitle="Proof points from people who have worked with or evaluated this project.">
+                          <div className="grid gap-3 md:grid-cols-2">
+                              {testimonials.map((item, index) => {
+                                  const rating = Number(item.rating ?? 0);
                                   return (
-                                      <li key={l.id}>
-                                          <a
-                                              href={`${l.url}`}
-                                              target="_blank"
-                                              rel="noreferrer"
-                                              className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition hover:-translate-y-0.5 hover:bg-neutral-50 hover:shadow-sm"
-                                              title={label}
-                                          >
-                                              <Icon className="h-4 w-4 text-fuchsia-600" />
-                                              <span className="max-w-[16ch] truncate">{l.label || label}</span>
-                                          </a>
-                                      </li>
+                                      <LandingCard key={item.id ?? `${item.name}-${index}`}>
+                                          <div className="flex items-start gap-3">
+                                              {item.logoUrl ? <img src={item.logoUrl} alt="" className="h-10 w-10 shrink-0 rounded-xl border border-slate-200 object-cover" /> : <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700"><Quote className="h-4 w-4" /></div>}
+                                              <div className="min-w-0"><figcaption className="text-sm font-semibold text-slate-950">{item.name}</figcaption>{(item.role || item.company) ? <p className="truncate text-xs text-slate-500">{[item.role, item.company].filter(Boolean).join(" at ")}</p> : null}</div>
+                                          </div>
+                                          {rating > 0 ? <div className="mt-3 flex items-center gap-1 text-amber-500">{Array.from({ length: Math.min(5, Math.max(1, Math.round(rating))) }).map((_, starIndex) => <Star key={starIndex} className="h-3.5 w-3.5 fill-current" />)}</div> : null}
+                                          <blockquote className="mt-3 break-words text-sm leading-6 text-slate-600">"{item.quote}"</blockquote>
+                                      </LandingCard>
                                   );
                               })}
-                          </ul>
-                      )}
-                  </CardContent>
-              </Card>
-              {(openForValues.length > 0 || collaborationNote) ? (
-                  <Card className="mt-4 rounded-3xl border border-blue-100 shadow-sm shadow-blue-950/5">
-                      <CardHeader className="pb-3">
-                          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
-                                  <Handshake className="h-5 w-5" />
-                              </div>
-                              Open For
-                          </CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                          {openForValues.length > 0 ? (
-                              <ProjectOpenForChips openFor={openForValues} />
-                          ) : null}
-                          {collaborationNote ? (
-                              <p className="text-sm leading-6 text-slate-600">{collaborationNote}</p>
-                          ) : null}
-                      </CardContent>
-                  </Card>
-              ) : null}
-              {canRequestCollaboration ? (
-                  <Card className="mt-4 overflow-hidden rounded-3xl border border-blue-100 bg-gradient-to-br from-slate-950 via-blue-950 to-blue-800 text-white shadow-sm shadow-blue-950/10">
-                      <CardContent className="flex flex-col gap-4 p-4 sm:p-5 md:flex-row md:items-center md:justify-between">
-                          <div className="flex min-w-0 items-start gap-3">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/15">
-                                  <BriefcaseBusiness className="h-5 w-5" />
-                              </div>
-                              <div className="min-w-0">
-                                  <h2 className="text-base font-semibold sm:text-lg">Work with this project</h2>
-                                  <p className="mt-1 text-sm leading-6 text-blue-100">
-                                      Send a focused collaboration, partnership, demo, proposal, or technical request.
-                                  </p>
-                              </div>
                           </div>
-                          <div className="grid w-full gap-2 sm:grid-cols-2 md:w-auto">
-                              <button
-                                  type="button"
-                                  onClick={() => openCollaborationRequest("PARTNERSHIP")}
-                                  className="h-10 rounded-2xl bg-white px-4 text-sm font-semibold text-slate-950 transition hover:bg-blue-50"
-                              >
-                                  Request Partnership
-                              </button>
-                              <button
-                                  type="button"
-                                  onClick={() => openCollaborationRequest("PROPOSAL")}
-                                  className="h-10 rounded-2xl border border-white/20 px-4 text-sm font-semibold text-white transition hover:bg-white/10"
-                              >
-                                  Get Proposal
-                              </button>
-                          </div>
-                      </CardContent>
-                  </Card>
-              ) : null}
-              {creator ? (
-                  <Card className="mt-4 rounded-3xl border border-blue-100 bg-white/95 shadow-sm shadow-blue-950/5">
-                      <CardHeader className="pb-3">
-                          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
-                                  <UserRound className="h-5 w-5" />
-                              </div>
-                              About the Creator
-                          </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                              <div className="flex min-w-0 items-start gap-4">
-                                  {creator.profile_picture_url ? (
-                                      <img
-                                          src={creator.profile_picture_url}
-                                          alt=""
-                                          className="h-14 w-14 shrink-0 rounded-2xl border border-blue-100 object-cover"
-                                      />
-                                  ) : (
-                                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-700 to-cyan-500 text-base font-semibold text-white">
-                                          {initials(creatorName)}
-                                      </div>
-                                  )}
-                                  <div className="min-w-0">
-                                      <h2 className="break-words text-base font-semibold text-slate-950 sm:text-lg">
-                                          {creatorName}
-                                      </h2>
-                                      {creator.title ? (
-                                          <p className="mt-1 text-sm font-medium text-blue-700">{creator.title}</p>
-                                      ) : null}
-                                      {creator.location ? (
-                                          <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
-                                              <MapPin className="h-3.5 w-3.5" />
-                                              {creator.location}
-                                          </p>
-                                      ) : null}
-                                      {creator.bio ? (
-                                          <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">
-                                              {creator.bio}
-                                          </p>
-                                      ) : null}
-                                  </div>
-                              </div>
-                              <Link
-                                  href={profileHref(creator)}
-                                  className="inline-flex h-10 items-center justify-center rounded-2xl border border-blue-100 px-4 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
-                              >
-                                  View profile
-                              </Link>
-                          </div>
-                      </CardContent>
-                  </Card>
-              ) : null}
+                      </LandingSection>
+                  ) : null}
 
-              {creatorProjects.length > 0 ? (
-                  <Card className="mt-4 rounded-3xl border border-blue-100 bg-white/95 shadow-sm shadow-blue-950/5">
-                      <CardHeader className="pb-3">
-                          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-100 text-cyan-700">
-                                  <FolderKanban className="h-5 w-5" />
-                              </div>
-                              Other Projects by {creatorName}
-                          </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                          <div className="grid gap-3 sm:grid-cols-2">
-                              {creatorProjects.map((item) => (
-                                  <Link
-                                      key={item.id}
-                                      href={`/projects/${item.id}`}
-                                      className="group flex min-w-0 gap-3 rounded-2xl border border-blue-100 bg-gradient-to-br from-white to-blue-50/50 p-3 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-sm hover:shadow-blue-950/10"
-                                  >
-                                      {item.coverImageUrl ? (
-                                          <img
-                                              src={item.coverImageUrl}
-                                              alt=""
-                                              className="h-16 w-20 shrink-0 rounded-xl object-cover"
-                                          />
-                                      ) : (
-                                          <div className="flex h-16 w-20 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
-                                              <FolderKanban className="h-5 w-5" />
-                                          </div>
-                                      )}
-                                      <div className="min-w-0">
-                                          <h3 className="truncate text-sm font-semibold text-slate-950 group-hover:text-blue-700">
-                                              {item.title}
-                                          </h3>
-                                          {item.category ? (
-                                              <p className="mt-1 truncate text-xs font-medium text-slate-500">{item.category}</p>
-                                          ) : null}
-                                          {item.bio ? (
-                                              <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-600">{item.bio}</p>
-                                          ) : null}
-                                      </div>
-                                  </Link>
-                              ))}
+                  {metrics.length > 0 ? (
+                      <LandingSection icon={<BarChart3 className="h-5 w-5" />} title="Metrics" subtitle="Numbers that describe the reach, traction, or impact of this project.">
+                          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                              {metrics.map((metric, index) => <LandingCard key={metric.id ?? `${metric.label}-${index}`}><div className="break-words text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">{metric.value}</div><div className="mt-1 text-sm font-semibold text-slate-700">{metric.label}</div>{metric.description ? <p className="mt-2 text-sm leading-6 text-slate-500">{metric.description}</p> : null}</LandingCard>)}
                           </div>
-                      </CardContent>
-                  </Card>
-              ) : null}
-              {milestones.length > 0 ? (
-                  <Card className="mt-4 rounded-3xl border border-blue-100 bg-white/95 shadow-sm shadow-blue-950/5">
-                      <CardHeader className="pb-3">
-                          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
-                                  <CalendarDays className="h-5 w-5" />
-                              </div>
-                              Project Journey
-                          </CardTitle>
-                      </CardHeader>
-                      <CardContent>
+                      </LandingSection>
+                  ) : null}
+
+                  {milestones.length > 0 ? (
+                      <LandingSection icon={<CalendarDays className="h-5 w-5" />} title="Project Journey" subtitle="Key milestones that show how this project has progressed over time.">
                           <div className="relative space-y-4">
                               <div className="absolute left-5 top-4 hidden h-[calc(100%-2rem)] w-px bg-blue-100 sm:block" />
                               {milestones.map((milestone, index) => {
                                   const meta = milestoneMeta(milestone.type);
                                   const Icon = meta.Icon;
-                                  const date = new Date(milestone.date as any);
+                                  const dateLabel = compactDate(milestone.date as any);
                                   return (
                                       <div key={milestone.id ?? `${milestone.title}-${index}`} className="relative grid gap-3 sm:grid-cols-[48px_minmax(0,1fr)]">
-                                          <div className="hidden justify-center sm:flex">
-                                              <div className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full border border-blue-100 bg-blue-50 text-blue-700">
-                                                  <Icon className="h-4 w-4" />
-                                              </div>
-                                          </div>
-                                          <div className="min-w-0 rounded-2xl border border-blue-100 bg-gradient-to-br from-white to-blue-50/40 p-4">
+                                          <div className="hidden justify-center sm:flex"><div className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full border border-blue-100 bg-blue-50 text-blue-700"><Icon className="h-4 w-4" /></div></div>
+                                          <LandingCard>
                                               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                                                  <div className="flex min-w-0 items-start gap-3">
-                                                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700 sm:hidden">
-                                                          <Icon className="h-4 w-4" />
-                                                      </div>
-                                                      <div className="min-w-0">
-                                                          <h3 className="break-words text-sm font-semibold text-slate-950 sm:text-base">
-                                                              {milestone.title}
-                                                          </h3>
-                                                          <p className="mt-1 text-xs font-medium uppercase tracking-wide text-slate-500">
-                                                              {Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}
-                                                          </p>
-                                                      </div>
-                                                  </div>
-                                                  <span className={`w-fit rounded-full px-2.5 py-1 text-xs font-semibold ${
-                                                      milestone.completed
-                                                          ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100"
-                                                          : "bg-amber-50 text-amber-700 ring-1 ring-amber-100"
-                                                  }`}>
-                                                      {milestone.completed ? "Completed" : "Planned"}
-                                                  </span>
+                                                  <div className="flex min-w-0 items-start gap-3"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700 sm:hidden"><Icon className="h-4 w-4" /></div><div className="min-w-0"><h3 className="break-words text-sm font-semibold text-slate-950 sm:text-base">{milestone.title}</h3>{dateLabel ? <p className="mt-1 text-xs font-medium uppercase tracking-wide text-slate-500">{dateLabel}</p> : null}</div></div>
+                                                  <span className={`w-fit rounded-full px-2.5 py-1 text-xs font-semibold ${milestone.completed ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100" : "bg-amber-50 text-amber-700 ring-1 ring-amber-100"}`}>{milestone.completed ? "Completed" : "Planned"}</span>
                                               </div>
-                                              {milestone.description ? (
-                                                  <p className="mt-3 text-sm leading-6 text-slate-600">{milestone.description}</p>
-                                              ) : null}
+                                              {milestone.description ? <p className="mt-3 text-sm leading-6 text-slate-600">{milestone.description}</p> : null}
                                               <div className="mt-3 text-xs font-semibold text-blue-700">{meta.label}</div>
-                                          </div>
+                                          </LandingCard>
                                       </div>
                                   );
                               })}
                           </div>
-                      </CardContent>
-                  </Card>
-              ) : null}
-              {/* TWO-COLUMN CONTENT AREA */}
-              <div className="mt-4 grid min-w-0 gap-4 lg:grid-cols-2">
-                  {/* Column A */}
-                  <div className="min-w-0 space-y-4">
-                      {/* STORY */}
-                      <Card className="rounded-3xl border border-blue-100 shadow-sm shadow-blue-950/5">
-                          <CardHeader className="pb-3">
-                              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
-                                      <BookOpen className="h-5 w-5" />
-                                  </div>
-                                  Story
-                              </CardTitle>
-                          </CardHeader>
-                          <CardContent className="prose max-w-none prose-neutral">
-                              {longDescription ? (
-                                  <MarkdownPreviewCard
-                                      md={longDescription}
-                                      maxChars={160}
-                                      className="border-none shadow-none"
-                                  />
-                              ) : (
-                                  <p className="text-neutral-500">No story yet.</p>
-                              )}
-                          </CardContent>
-                      </Card>
+                      </LandingSection>
+                  ) : null}
 
-                      {/* OVERVIEW */}
-                      <Card className="rounded-3xl border border-blue-100 shadow-sm shadow-blue-950/5">
-                          <CardHeader className="pb-3">
-                              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-100 text-sky-700">
-                                      <LayoutGrid className="h-5 w-5" />
-                                  </div>
-                                  Overview
-                              </CardTitle>
-                          </CardHeader>
-                          <CardContent className="space-y-4">
-                              {description ? (
-                                  <p className="leading-7 text-neutral-700">{description}</p>
-                              ) : (
-                                  <p className="text-neutral-500">No overview provided.</p>
-                              )}
-
-                              {tags?.length ? (
-                                  <div className="flex flex-wrap gap-2">
-                                      {tags.map((t) => (
-                                          <span
-                                              key={t}
-                                              className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700"
-                                          >
-                                              {t}
-                                          </span>
-                                      ))}
-                                  </div>
-                              ) : null}
-                          </CardContent>
-                      </Card>
-                  </div>
-
-                  {/* Column B */}
-                  <div className="min-w-0 space-y-4">
-                      <Card className="rounded-3xl border border-blue-100 shadow-sm shadow-blue-950/5">
-                          <CardHeader className="pb-3">
-                              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
-                                      <MapPin className="h-5 w-5" />
-                                  </div>
-                                  Contact & Address
-                              </CardTitle>
-                          </CardHeader>
-
-                          <CardContent className="space-y-4">
-                              {website ? (
-                                  <div className="flex items-start gap-3 rounded-xl bg-zinc-50 p-3">
-                                      <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
-                                          <Globe className="h-4 w-4" />
-                                      </div>
-                                      <div className="min-w-0">
-                                          <div className="text-xs font-medium uppercase tracking-wide text-neutral-500">
-                                              Website
+                  {brochures.length > 0 ? (
+                      <LandingSection
+                          icon={<FileText className="h-5 w-5" />}
+                          title="Brochure / Catalog"
+                          subtitle="Download supporting documents, catalogs, or business materials for this project."
+                      >
+                          <div className="grid gap-3 md:grid-cols-2">
+                              {brochures.map((item, index) => {
+                                  const fileUrl = item.fileUrl ?? item.url ?? "#";
+                                  const fileName = item.fileName ?? item.filename ?? "PDF brochure";
+                                  return (
+                                      <LandingCard key={item.id ?? `${fileUrl}-${index}`} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                          <div className="flex min-w-0 items-start gap-3">
+                                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700 ring-1 ring-blue-100">
+                                                  <FileText className="h-4 w-4" />
+                                              </div>
+                                              <div className="min-w-0">
+                                                  <div className="truncate text-sm font-semibold text-slate-950">{item.title || "Brochure / Catalog"}</div>
+                                                  <div className="truncate text-xs text-slate-500">{fileName}</div>
+                                              </div>
                                           </div>
                                           <a
-                                              className="block truncate text-blue-600 hover:underline"
-                                              href={normalizeHref(website)}
+                                              href={fileUrl}
                                               target="_blank"
                                               rel="noreferrer"
+                                              download
+                                              className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-2xl bg-blue-700 px-4 text-sm font-semibold text-white transition hover:bg-blue-800 sm:w-auto"
                                           >
-                                              {website}
+                                              <FileDown className="h-4 w-4" />
+                                              Download
                                           </a>
-                                      </div>
-                                  </div>
+                                      </LandingCard>
+                                  );
+                              })}
+                          </div>
+                      </LandingSection>
+                  ) : null}
+
+                  {showGalleryDetails ? (
+                      <LandingSection icon={<LayoutGrid className="h-5 w-5" />} title="Gallery & Details" subtitle="A compact view of the story, visuals, documents, and public channels behind the project.">
+                          <div className="grid gap-4 lg:grid-cols-2">
+                              {coverImageUrl ? <LandingCard className="overflow-hidden p-0"><img src={coverImageUrl} alt="" className="h-52 w-full object-cover sm:h-64" /></LandingCard> : null}
+                              <LandingCard><div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-950"><BookOpen className="h-4 w-4 text-blue-700" />Story</div>{longDescription ? <MarkdownPreviewCard md={longDescription} maxChars={220} className="border-none shadow-none" /> : <p className="text-sm text-slate-500">No story yet.</p>}</LandingCard>
+                              <LandingCard><div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-950"><LayoutGrid className="h-4 w-4 text-blue-700" />Overview</div>{description ? <p className="break-words text-sm leading-6 text-slate-600">{description}</p> : <p className="text-sm text-slate-500">No overview provided.</p>}{tags?.length ? <div className="mt-4 flex flex-wrap gap-2">{tags.map((t) => <span key={t} className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">{t}</span>)}</div> : null}</LandingCard>
+                              {socialLinks.length > 0 ? (
+                                  <LandingCard>
+                                      <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-950"><Share2 className="h-4 w-4 text-blue-700" />Find us online</div>
+                                      <ul className="flex flex-wrap gap-2">{socialLinks.map((l) => { const Icon = PlatformIcon(l.platform); const label = SOCIAL_PLATFORMS.find((p) => p.key === l.platform)?.label ?? l.platform; return <li key={l.id} className="min-w-0"><a href={`${l.url}`} target="_blank" rel="noreferrer" className="inline-flex max-w-full items-center gap-2 rounded-full border border-blue-100 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-blue-50" title={label}><Icon className="h-4 w-4 shrink-0 text-blue-700" /><span className="truncate">{l.label || label}</span></a></li>; })}</ul>
+                                  </LandingCard>
                               ) : null}
+                          </div>
+                      </LandingSection>
+                  ) : null}
 
-                              {contactEmail ? (
-                                  <div className="flex items-start gap-3 rounded-xl bg-zinc-50 p-3">
-                                      <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-lg bg-pink-100 text-pink-700">
-                                          <Mail className="h-4 w-4" />
-                                      </div>
-                                      <div className="min-w-0">
-                                          <div className="text-xs font-medium uppercase tracking-wide text-neutral-500">
-                                              Email
-                                          </div>
-                                          <a className="text-blue-600 hover:underline" href={`mailto:${contactEmail}`}>
-                                              {contactEmail}
-                                          </a>
-                                      </div>
-                                  </div>
+                  {creator ? (
+                      <LandingSection icon={<UserRound className="h-5 w-5" />} title="About the Creator" subtitle="The profile behind this project.">
+                          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                              <div className="flex min-w-0 items-start gap-4">
+                                  {creator.profile_picture_url ? <img src={creator.profile_picture_url} alt="" className="h-14 w-14 shrink-0 rounded-2xl border border-blue-100 object-cover" /> : <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-700 to-cyan-500 text-base font-semibold text-white">{initials(creatorName)}</div>}
+                                  <div className="min-w-0"><h3 className="break-words text-base font-semibold text-slate-950 sm:text-lg">{creatorName}</h3>{creator.title ? <p className="mt-1 text-sm font-medium text-blue-700">{creator.title}</p> : null}{creator.location ? <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-500"><MapPin className="h-3.5 w-3.5" />{creator.location}</p> : null}{creator.bio ? <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">{creator.bio}</p> : null}</div>
+                              </div>
+                              <Link href={profileHref(creator)} className="inline-flex h-10 items-center justify-center rounded-2xl border border-blue-100 px-4 text-sm font-semibold text-blue-700 transition hover:bg-blue-50">View profile</Link>
+                          </div>
+                      </LandingSection>
+                  ) : null}
+
+                  {creatorProjects.length > 0 ? (
+                      <LandingSection icon={<FolderKanban className="h-5 w-5" />} title={`Other Projects by ${creatorName}`} subtitle="More work from the same creator or business profile.">
+                          <div className="grid gap-3 sm:grid-cols-2">{creatorProjects.map((item) => <Link key={item.id} href={`/projects/${item.id}`} className="group flex min-w-0 gap-3 rounded-2xl border border-blue-100 bg-gradient-to-br from-white to-blue-50/50 p-3 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-sm hover:shadow-blue-950/10">{item.coverImageUrl ? <img src={item.coverImageUrl} alt="" className="h-16 w-20 shrink-0 rounded-xl object-cover" /> : <div className="flex h-16 w-20 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700"><FolderKanban className="h-5 w-5" /></div>}<div className="min-w-0"><h3 className="truncate text-sm font-semibold text-slate-950 group-hover:text-blue-700">{item.title}</h3>{item.category ? <p className="mt-1 truncate text-xs font-medium text-slate-500">{item.category}</p> : null}{item.bio ? <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-600">{item.bio}</p> : null}</div></Link>)}</div>
+                      </LandingSection>
+                  ) : null}
+
+                  <LandingSection icon={<MessageCircleMore className="h-5 w-5" />} title="Contact" subtitle="Reach out directly about this project or business." className="bg-gradient-to-tr from-blue-50 via-white to-cyan-50/50">
+                      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+                          <div className="grid gap-3 sm:grid-cols-2">
+                              {website ? <div className="flex min-w-0 items-start gap-3 rounded-2xl border border-blue-100 bg-white/80 p-3"><div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-700"><Globe className="h-4 w-4" /></div><div className="min-w-0"><div className="text-xs font-medium uppercase tracking-wide text-slate-500">Website</div><a className="block truncate text-sm font-medium text-blue-700 hover:underline" href={normalizeHref(website)} target="_blank" rel="noreferrer">{website}</a></div></div> : null}
+                              {contactEmail ? <div className="flex min-w-0 items-start gap-3 rounded-2xl border border-blue-100 bg-white/80 p-3"><div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-700"><Mail className="h-4 w-4" /></div><div className="min-w-0"><div className="text-xs font-medium uppercase tracking-wide text-slate-500">Email</div><a className="block truncate text-sm font-medium text-blue-700 hover:underline" href={`mailto:${contactEmail}`}>{contactEmail}</a></div></div> : null}
+                              {contactPhone ? <div className="flex min-w-0 items-start gap-3 rounded-2xl border border-blue-100 bg-white/80 p-3"><div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-700"><Phone className="h-4 w-4" /></div><div className="min-w-0"><div className="text-xs font-medium uppercase tracking-wide text-slate-500">Phone</div><a className="block truncate text-sm font-medium text-blue-700 hover:underline" href={`tel:${contactPhone}`}>{contactPhone}</a></div></div> : null}
+                              {(addressLine1 || city || country) ? <div className="rounded-2xl border border-blue-100 bg-white/80 p-3 text-sm text-slate-700 sm:col-span-2"><div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-900"><MapPinned className="h-4 w-4 text-blue-700" />Address</div>{[addressLine1, addressLine2].filter(Boolean).map((x, i) => <div key={i}>{x}</div>)}<div>{[city, region, postalCode].filter(Boolean).join(" ")}</div><div>{country}</div></div> : null}
+                          </div>
+                          <div className="grid gap-2 sm:grid-cols-2 lg:w-auto lg:grid-cols-1">
+                              <button onClick={() => setLeadOpen(true)} className="inline-flex h-10 w-full items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 sm:h-11">Contact</button>
+                              {canRequestCollaboration ? (
+                                  <button
+                                      type="button"
+                                      onClick={() => openCollaborationRequest("COLLABORATION")}
+                                      className="inline-flex h-10 w-full items-center justify-center rounded-2xl border border-blue-100 bg-white px-5 text-sm font-semibold text-blue-700 transition hover:bg-blue-50 sm:h-11"
+                                  >
+                                      Request Collaboration
+                                  </button>
                               ) : null}
-
-                              {contactPhone ? (
-                                  <div className="flex items-start gap-3 rounded-xl bg-zinc-50 p-3">
-                                      <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
-                                          <Phone className="h-4 w-4" />
-                                      </div>
-                                      <div className="min-w-0">
-                                          <div className="text-xs font-medium uppercase tracking-wide text-neutral-500">
-                                              Phone
-                                          </div>
-                                          <a className="text-blue-600 hover:underline" href={`tel:${contactPhone}`}>
-                                              {contactPhone}
-                                          </a>
-                                      </div>
-                                  </div>
-                              ) : null}
-
-                              {(addressLine1 || city || country) ? (
-                                  <div className="rounded-xl bg-zinc-50 p-4 text-sm text-neutral-700">
-                                      <div className="mb-2 flex items-center gap-2 text-sm font-medium text-neutral-800">
-                                          <MapPinned className="h-4 w-4 text-emerald-600" />
-                                          Address
-                                      </div>
-
-                                      {[addressLine1, addressLine2].filter(Boolean).map((x, i) => (
-                                          <div key={i}>{x}</div>
-                                      ))}
-                                      <div>{[city, region, postalCode].filter(Boolean).join(" ")}</div>
-                                      <div>{country}</div>
-                                  </div>
-                              ) : (
-                                  <p className="text-neutral-500">No address provided.</p>
-                              )}
-                          </CardContent>
-                      </Card>
-                  </div>
-              </div>
-
-              
-
-              
-
-              {/* CONTACT CTA */}
-              <div className="mt-6 flex flex-col items-start justify-between gap-4 rounded-3xl border border-blue-100 bg-gradient-to-tr from-blue-50 via-white to-cyan-50/40 p-5 shadow-sm shadow-blue-950/5 sm:flex-row sm:items-center">
-                  <div className="flex items-start gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
-                          <MessageCircleMore className="h-5 w-5" />
+                          </div>
                       </div>
-                      <div>
-                          <p className="font-medium text-neutral-900">
-                              Have a question or business inquiry?
-                          </p>
-                          <p className="mt-1 text-sm text-neutral-500">
-                              Reach out directly about this project or business.
-                          </p>
-                      </div>
-                  </div>
-
-                  <button
-                      onClick={() => setLeadOpen(true)}
-                      className="h-10 rounded-xl bg-neutral-900 px-4 text-sm font-medium text-white transition hover:bg-neutral-700 sm:h-11 sm:px-6"
-                  >
-                      Contact
-                  </button>
+                  </LandingSection>
               </div>
 
               {collaborationOpen && (

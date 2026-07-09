@@ -199,6 +199,24 @@ const ProjectMilestoneBody = z.object({
   sortOrder: z.coerce.number().int().min(0).optional().default(0),
 });
 
+const ProjectTestimonialBody = z.object({
+  name: z.string().min(1).max(120),
+  company: z.string().max(120).optional().nullable(),
+  role: z.string().max(120).optional().nullable(),
+  quote: z.string().min(1).max(5000),
+  logoUrl: z.string().max(500).optional().nullable(),
+  rating: z.coerce.number().int().min(1).max(5).optional().nullable(),
+  isFeatured: z.coerce.boolean().optional().default(false),
+  sortOrder: z.coerce.number().int().min(0).optional().default(0),
+});
+
+const ProjectMetricBody = z.object({
+  label: z.string().min(1).max(120),
+  value: z.string().min(1).max(120),
+  description: z.string().max(2000).optional().nullable(),
+  sortOrder: z.coerce.number().int().min(0).optional().default(0),
+});
+
 const PackageParams = z.object({
   id: z.coerce.number().int().positive(),
   packageId: z.coerce.number().int().positive(),
@@ -207,6 +225,16 @@ const PackageParams = z.object({
 const MilestoneParams = z.object({
   id: z.coerce.number().int().positive(),
   milestoneId: z.coerce.number().int().positive(),
+});
+
+const TestimonialParams = z.object({
+  id: z.coerce.number().int().positive(),
+  testimonialId: z.coerce.number().int().positive(),
+});
+
+const MetricParams = z.object({
+  id: z.coerce.number().int().positive(),
+  metricId: z.coerce.number().int().positive(),
 });
 
 // -------------------- Helpers --------------------
@@ -309,7 +337,6 @@ export async function projectPublicViewById(req: FastifyRequest, reply: FastifyR
             profile: {
                 select: {
                     id: true,
-                    userId: true,
                     username: true,
                     name: true,
                     title: true,
@@ -333,9 +360,65 @@ export async function projectPublicViewById(req: FastifyRequest, reply: FastifyR
                 },
             },
             socialLinks: { orderBy: { sort_order: "asc" } },
-            packages: { orderBy: [{ isFeatured: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }] },
-            scope: true,
-            milestones: { orderBy: [{ date: "asc" }, { sortOrder: "asc" }, { createdAt: "asc" }] },
+            packages: {
+                orderBy: [{ isFeatured: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
+                select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    price: true,
+                    timeline: true,
+                    deliverablesText: true,
+                    ctaLabel: true,
+                    ctaLink: true,
+                    isFeatured: true,
+                    sortOrder: true,
+                },
+            },
+            scope: {
+                select: {
+                    includedText: true,
+                    excludedText: true,
+                    toolsText: true,
+                    timeline: true,
+                },
+            },
+            milestones: {
+                orderBy: [{ date: "asc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
+                select: {
+                    id: true,
+                    type: true,
+                    title: true,
+                    description: true,
+                    date: true,
+                    completed: true,
+                    sortOrder: true,
+                },
+            },
+            testimonials: {
+                orderBy: [{ isFeatured: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
+                select: {
+                    id: true,
+                    name: true,
+                    company: true,
+                    role: true,
+                    quote: true,
+                    logoUrl: true,
+                    rating: true,
+                    isFeatured: true,
+                    sortOrder: true,
+                },
+            },
+            metrics: {
+                orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+                select: {
+                    id: true,
+                    label: true,
+                    value: true,
+                    description: true,
+                    sortOrder: true,
+                },
+            },
         },
     });
     if (!project) return reply.code(404).send({ message: "Project not found" });
@@ -358,6 +441,8 @@ export async function getProjectById(req: FastifyRequest, reply: FastifyReply) {
           packages: { orderBy: [{ isFeatured: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }] },
           scope: true,
           milestones: { orderBy: [{ date: "asc" }, { sortOrder: "asc" }, { createdAt: "asc" }] },
+          testimonials: { orderBy: [{ isFeatured: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }] },
+          metrics: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] },
       },
   });
   if (!project) return reply.code(404).send({ message: "Project not found" });
@@ -832,6 +917,124 @@ export async function deleteProjectMilestone(req: FastifyRequest, reply: Fastify
   }
 
   await req.server.prisma.projectMilestone.delete({ where: { id: milestoneId } });
+  reply.send({ ok: true });
+}
+
+// ---------- Testimonials & Metrics ----------
+
+export async function createProjectTestimonial(req: FastifyRequest, reply: FastifyReply) {
+  const { id } = IdParam.parse(req.params);
+  const data = ProjectTestimonialBody.parse(req.body);
+  const project = await loadOwnedProject(req, id);
+
+  const created = await req.server.prisma.projectTestimonial.create({
+    data: {
+      projectId: project.id,
+      name: data.name,
+      company: data.company ?? null,
+      role: data.role ?? null,
+      quote: data.quote,
+      logoUrl: data.logoUrl ?? null,
+      rating: data.rating ?? null,
+      isFeatured: !!data.isFeatured,
+      sortOrder: data.sortOrder ?? 0,
+    },
+  });
+
+  reply.code(201).send(created);
+}
+
+export async function updateProjectTestimonial(req: FastifyRequest, reply: FastifyReply) {
+  const { id, testimonialId } = TestimonialParams.parse(req.params);
+  const data = ProjectTestimonialBody.parse(req.body);
+  const project = await loadOwnedProject(req, id);
+
+  const existing = await req.server.prisma.projectTestimonial.findUnique({ where: { id: testimonialId } });
+  if (!existing || existing.projectId !== project.id) {
+    return reply.code(404).send({ message: "Testimonial not found" });
+  }
+
+  const updated = await req.server.prisma.projectTestimonial.update({
+    where: { id: testimonialId },
+    data: {
+      name: data.name,
+      company: data.company ?? null,
+      role: data.role ?? null,
+      quote: data.quote,
+      logoUrl: data.logoUrl ?? null,
+      rating: data.rating ?? null,
+      isFeatured: !!data.isFeatured,
+      sortOrder: data.sortOrder ?? 0,
+    },
+  });
+
+  reply.send(updated);
+}
+
+export async function deleteProjectTestimonial(req: FastifyRequest, reply: FastifyReply) {
+  const { id, testimonialId } = TestimonialParams.parse(req.params);
+  const project = await loadOwnedProject(req, id);
+
+  const existing = await req.server.prisma.projectTestimonial.findUnique({ where: { id: testimonialId } });
+  if (!existing || existing.projectId !== project.id) {
+    return reply.code(404).send({ message: "Testimonial not found" });
+  }
+
+  await req.server.prisma.projectTestimonial.delete({ where: { id: testimonialId } });
+  reply.send({ ok: true });
+}
+
+export async function createProjectMetric(req: FastifyRequest, reply: FastifyReply) {
+  const { id } = IdParam.parse(req.params);
+  const data = ProjectMetricBody.parse(req.body);
+  const project = await loadOwnedProject(req, id);
+
+  const created = await req.server.prisma.projectMetric.create({
+    data: {
+      projectId: project.id,
+      label: data.label,
+      value: data.value,
+      description: data.description ?? null,
+      sortOrder: data.sortOrder ?? 0,
+    },
+  });
+
+  reply.code(201).send(created);
+}
+
+export async function updateProjectMetric(req: FastifyRequest, reply: FastifyReply) {
+  const { id, metricId } = MetricParams.parse(req.params);
+  const data = ProjectMetricBody.parse(req.body);
+  const project = await loadOwnedProject(req, id);
+
+  const existing = await req.server.prisma.projectMetric.findUnique({ where: { id: metricId } });
+  if (!existing || existing.projectId !== project.id) {
+    return reply.code(404).send({ message: "Metric not found" });
+  }
+
+  const updated = await req.server.prisma.projectMetric.update({
+    where: { id: metricId },
+    data: {
+      label: data.label,
+      value: data.value,
+      description: data.description ?? null,
+      sortOrder: data.sortOrder ?? 0,
+    },
+  });
+
+  reply.send(updated);
+}
+
+export async function deleteProjectMetric(req: FastifyRequest, reply: FastifyReply) {
+  const { id, metricId } = MetricParams.parse(req.params);
+  const project = await loadOwnedProject(req, id);
+
+  const existing = await req.server.prisma.projectMetric.findUnique({ where: { id: metricId } });
+  if (!existing || existing.projectId !== project.id) {
+    return reply.code(404).send({ message: "Metric not found" });
+  }
+
+  await req.server.prisma.projectMetric.delete({ where: { id: metricId } });
   reply.send({ ok: true });
 }
 

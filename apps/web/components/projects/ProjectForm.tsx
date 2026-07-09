@@ -115,6 +115,8 @@ type Props = {
         packages?: ProjectPackageFormValue[];
         scope?: ProjectScopeFormValue | null;
         milestones?: ProjectMilestoneFormValue[];
+        testimonials?: ProjectTestimonialFormValue[];
+        metrics?: ProjectMetricFormValue[];
     };
 };
 
@@ -148,6 +150,26 @@ type ProjectScopeFormValue = {
     timeline?: string | null;
 };
 
+type ProjectTestimonialFormValue = {
+    id?: number;
+    name: string;
+    company?: string | null;
+    role?: string | null;
+    quote: string;
+    logoUrl?: string | null;
+    rating?: number | null;
+    isFeatured?: boolean;
+    sortOrder?: number | null;
+};
+
+type ProjectMetricFormValue = {
+    id?: number;
+    label: string;
+    value: string;
+    description?: string | null;
+    sortOrder?: number | null;
+};
+
 const emptyPackage: ProjectPackageFormValue = {
     name: "",
     description: "",
@@ -157,6 +179,24 @@ const emptyPackage: ProjectPackageFormValue = {
     ctaLabel: "",
     ctaLink: "",
     isFeatured: false,
+    sortOrder: 0,
+};
+
+const emptyTestimonial: ProjectTestimonialFormValue = {
+    name: "",
+    company: "",
+    role: "",
+    quote: "",
+    logoUrl: "",
+    rating: null,
+    isFeatured: false,
+    sortOrder: 0,
+};
+
+const emptyMetric: ProjectMetricFormValue = {
+    label: "",
+    value: "",
+    description: "",
     sortOrder: 0,
 };
 
@@ -354,9 +394,15 @@ export default function ProjectForm({ mode, initial }: Props) {
     });
     const [milestones, setMilestones] = useState<ProjectMilestoneFormValue[]>(initial?.milestones ?? []);
     const [milestoneDraft, setMilestoneDraft] = useState<ProjectMilestoneFormValue>(emptyMilestone);
+    const [testimonials, setTestimonials] = useState<ProjectTestimonialFormValue[]>(initial?.testimonials ?? []);
+    const [testimonialDraft, setTestimonialDraft] = useState<ProjectTestimonialFormValue>(emptyTestimonial);
+    const [metrics, setMetrics] = useState<ProjectMetricFormValue[]>(initial?.metrics ?? []);
+    const [metricDraft, setMetricDraft] = useState<ProjectMetricFormValue>(emptyMetric);
     const [savingPackage, setSavingPackage] = useState(false);
     const [savingScope, setSavingScope] = useState(false);
     const [savingMilestone, setSavingMilestone] = useState(false);
+    const [savingTestimonial, setSavingTestimonial] = useState(false);
+    const [savingMetric, setSavingMetric] = useState(false);
 
     /* ===== BASIC ===== */
     const basic = useForm<BasicValues>({
@@ -770,6 +816,142 @@ export default function ProjectForm({ mode, initial }: Props) {
 
         setMilestones((current) => current.filter((item) => item.id !== milestoneId));
         toast.success("Milestone deleted");
+    }
+
+    async function saveTestimonial(testimonial: ProjectTestimonialFormValue) {
+        if (!projectId) {
+            toast.info("Save Basic first to create the project.");
+            return;
+        }
+        if (!testimonial.name.trim() || !testimonial.quote.trim()) {
+            toast.error("Testimonial name and quote are required.");
+            return;
+        }
+
+        setSavingTestimonial(true);
+        try {
+            const isUpdate = !!testimonial.id;
+            const res = await fetch(`${API_BASE}/projects/${projectId}/testimonials${isUpdate ? `/${testimonial.id}` : ""}`, {
+                method: isUpdate ? "PATCH" : "POST",
+                headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                    name: testimonial.name,
+                    company: testimonial.company ?? "",
+                    role: testimonial.role ?? "",
+                    quote: testimonial.quote,
+                    logoUrl: testimonial.logoUrl ?? "",
+                    rating: testimonial.rating ? Number(testimonial.rating) : null,
+                    isFeatured: !!testimonial.isFeatured,
+                    sortOrder: Number(testimonial.sortOrder ?? 0),
+                }),
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                toast.error(err?.message ?? "Could not save testimonial");
+                return;
+            }
+
+            const saved = await res.json();
+            setTestimonials((current) =>
+                (isUpdate
+                    ? current.map((item) => (item.id === saved.id ? saved : item))
+                    : [...current, saved]
+                ).sort((a, b) => Number(b.isFeatured) - Number(a.isFeatured) || Number(a.sortOrder ?? 0) - Number(b.sortOrder ?? 0))
+            );
+            if (!isUpdate) setTestimonialDraft(emptyTestimonial);
+            toast.success(isUpdate ? "Testimonial updated" : "Testimonial added");
+        } finally {
+            setSavingTestimonial(false);
+        }
+    }
+
+    async function deleteTestimonial(testimonialId?: number) {
+        if (!projectId || !testimonialId) return;
+        const confirmed = window.confirm("Delete this testimonial?");
+        if (!confirmed) return;
+
+        const res = await fetch(`${API_BASE}/projects/${projectId}/testimonials/${testimonialId}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+            credentials: "include",
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            toast.error(err?.message ?? "Could not delete testimonial");
+            return;
+        }
+
+        setTestimonials((current) => current.filter((item) => item.id !== testimonialId));
+        toast.success("Testimonial deleted");
+    }
+
+    async function saveMetric(metric: ProjectMetricFormValue) {
+        if (!projectId) {
+            toast.info("Save Basic first to create the project.");
+            return;
+        }
+        if (!metric.label.trim() || !metric.value.trim()) {
+            toast.error("Metric label and value are required.");
+            return;
+        }
+
+        setSavingMetric(true);
+        try {
+            const isUpdate = !!metric.id;
+            const res = await fetch(`${API_BASE}/projects/${projectId}/metrics${isUpdate ? `/${metric.id}` : ""}`, {
+                method: isUpdate ? "PATCH" : "POST",
+                headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                    label: metric.label,
+                    value: metric.value,
+                    description: metric.description ?? "",
+                    sortOrder: Number(metric.sortOrder ?? 0),
+                }),
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                toast.error(err?.message ?? "Could not save metric");
+                return;
+            }
+
+            const saved = await res.json();
+            setMetrics((current) =>
+                (isUpdate
+                    ? current.map((item) => (item.id === saved.id ? saved : item))
+                    : [...current, saved]
+                ).sort((a, b) => Number(a.sortOrder ?? 0) - Number(b.sortOrder ?? 0))
+            );
+            if (!isUpdate) setMetricDraft(emptyMetric);
+            toast.success(isUpdate ? "Metric updated" : "Metric added");
+        } finally {
+            setSavingMetric(false);
+        }
+    }
+
+    async function deleteMetric(metricId?: number) {
+        if (!projectId || !metricId) return;
+        const confirmed = window.confirm("Delete this metric?");
+        if (!confirmed) return;
+
+        const res = await fetch(`${API_BASE}/projects/${projectId}/metrics/${metricId}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+            credentials: "include",
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            toast.error(err?.message ?? "Could not delete metric");
+            return;
+        }
+
+        setMetrics((current) => current.filter((item) => item.id !== metricId));
+        toast.success("Metric deleted");
     }
 
     const basicErrors = basic.formState.errors;
@@ -1292,11 +1474,6 @@ export default function ProjectForm({ mode, initial }: Props) {
                                     />
                                 </CardHeader>
                                 <CardContent className="space-y-5">
-                                    {/* TODO(Sprint 3 backend): Enable once ProjectTestimonial and ProjectMetric models/API routes are available. */}
-                                    <div className="rounded-2xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-sm leading-6 text-amber-800">
-                                        Testimonials and metrics are read-only because ProjectTestimonial and ProjectMetric API support is not present in the current backend schema.
-                                    </div>
-
                                     <div className="grid gap-4 md:grid-cols-2">
                                         <div className="rounded-2xl border border-blue-100 bg-blue-50/40 p-4">
                                             <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900">
@@ -1304,21 +1481,23 @@ export default function ProjectForm({ mode, initial }: Props) {
                                                 Testimonials
                                             </div>
                                             <div className="grid gap-3">
-                                                <input disabled placeholder="Name" className="h-10 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm" />
-                                                <input disabled placeholder="Company" className="h-10 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm" />
-                                                <input disabled placeholder="Role" className="h-10 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm" />
-                                                <textarea disabled rows={3} placeholder="Quote" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm" />
-                                                <input disabled placeholder="Logo URL" className="h-10 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm" />
+                                                <input value={testimonialDraft.name} onChange={(e) => setTestimonialDraft((t) => ({ ...t, name: e.target.value }))} placeholder="Name" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                                                <input value={testimonialDraft.company ?? ""} onChange={(e) => setTestimonialDraft((t) => ({ ...t, company: e.target.value }))} placeholder="Company" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                                                <input value={testimonialDraft.role ?? ""} onChange={(e) => setTestimonialDraft((t) => ({ ...t, role: e.target.value }))} placeholder="Role" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                                                <textarea value={testimonialDraft.quote} onChange={(e) => setTestimonialDraft((t) => ({ ...t, quote: e.target.value }))} rows={3} placeholder="Quote" className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                                                <input value={testimonialDraft.logoUrl ?? ""} onChange={(e) => setTestimonialDraft((t) => ({ ...t, logoUrl: e.target.value }))} placeholder="Logo URL" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
                                                 <div className="grid grid-cols-2 gap-2">
-                                                    <label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500">
-                                                        <input disabled type="checkbox" />
+                                                    <label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+                                                        <input checked={!!testimonialDraft.isFeatured} onChange={(e) => setTestimonialDraft((t) => ({ ...t, isFeatured: e.target.checked }))} type="checkbox" />
                                                         Featured
                                                     </label>
-                                                    <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500">
-                                                        <Star className="h-4 w-4" />
-                                                        Rating
-                                                    </div>
+                                                    <input value={testimonialDraft.rating ?? ""} onChange={(e) => setTestimonialDraft((t) => ({ ...t, rating: e.target.value ? Number(e.target.value) : null }))} type="number" min={1} max={5} placeholder="Rating" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
                                                 </div>
+                                                <input value={testimonialDraft.sortOrder ?? 0} onChange={(e) => setTestimonialDraft((t) => ({ ...t, sortOrder: Number(e.target.value) }))} type="number" min={0} placeholder="Sort order" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                                                <Button type="button" disabled={!projectId || savingTestimonial} onClick={() => saveTestimonial(testimonialDraft)} className="h-10 rounded-xl bg-blue-700 text-sm font-semibold text-white hover:bg-blue-800">
+                                                    <Plus className="mr-2 h-4 w-4" />
+                                                    Add testimonial
+                                                </Button>
                                             </div>
                                         </div>
 
@@ -1328,15 +1507,76 @@ export default function ProjectForm({ mode, initial }: Props) {
                                                 Project metrics
                                             </div>
                                             <div className="grid gap-3">
-                                                <input disabled placeholder="Metric value" className="h-10 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm" />
-                                                <input disabled placeholder="Metric label" className="h-10 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm" />
-                                                <textarea disabled rows={3} placeholder="Optional description" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm" />
-                                                <button disabled className="h-10 rounded-xl bg-slate-200 px-4 text-sm font-semibold text-slate-500">
-                                                    Add metric disabled
-                                                </button>
+                                                <input value={metricDraft.value} onChange={(e) => setMetricDraft((m) => ({ ...m, value: e.target.value }))} placeholder="Metric value" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                                                <input value={metricDraft.label} onChange={(e) => setMetricDraft((m) => ({ ...m, label: e.target.value }))} placeholder="Metric label" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                                                <textarea value={metricDraft.description ?? ""} onChange={(e) => setMetricDraft((m) => ({ ...m, description: e.target.value }))} rows={3} placeholder="Optional description" className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                                                <input value={metricDraft.sortOrder ?? 0} onChange={(e) => setMetricDraft((m) => ({ ...m, sortOrder: Number(e.target.value) }))} type="number" min={0} placeholder="Sort order" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                                                <Button type="button" disabled={!projectId || savingMetric} onClick={() => saveMetric(metricDraft)} className="h-10 rounded-xl bg-blue-700 text-sm font-semibold text-white hover:bg-blue-800">
+                                                    <Plus className="mr-2 h-4 w-4" />
+                                                    Add metric
+                                                </Button>
                                             </div>
                                         </div>
                                     </div>
+
+                                    {testimonials.length > 0 ? (
+                                        <div className="grid gap-3">
+                                            {testimonials.map((testimonial) => (
+                                                <div key={testimonial.id ?? testimonial.name} className="rounded-2xl border border-slate-200 bg-white p-4">
+                                                    <div className="grid gap-3 md:grid-cols-2">
+                                                        <input value={testimonial.name} onChange={(e) => setTestimonials((items) => items.map((item) => item.id === testimonial.id ? { ...item, name: e.target.value } : item))} placeholder="Name" className="h-10 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                                                        <input value={testimonial.company ?? ""} onChange={(e) => setTestimonials((items) => items.map((item) => item.id === testimonial.id ? { ...item, company: e.target.value } : item))} placeholder="Company" className="h-10 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                                                        <input value={testimonial.role ?? ""} onChange={(e) => setTestimonials((items) => items.map((item) => item.id === testimonial.id ? { ...item, role: e.target.value } : item))} placeholder="Role" className="h-10 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                                                        <input value={testimonial.logoUrl ?? ""} onChange={(e) => setTestimonials((items) => items.map((item) => item.id === testimonial.id ? { ...item, logoUrl: e.target.value } : item))} placeholder="Logo URL" className="h-10 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                                                        <textarea value={testimonial.quote} onChange={(e) => setTestimonials((items) => items.map((item) => item.id === testimonial.id ? { ...item, quote: e.target.value } : item))} rows={3} placeholder="Quote" className="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-2" />
+                                                        <input value={testimonial.rating ?? ""} onChange={(e) => setTestimonials((items) => items.map((item) => item.id === testimonial.id ? { ...item, rating: e.target.value ? Number(e.target.value) : null } : item))} type="number" min={1} max={5} placeholder="Rating" className="h-10 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                                                        <input value={testimonial.sortOrder ?? 0} onChange={(e) => setTestimonials((items) => items.map((item) => item.id === testimonial.id ? { ...item, sortOrder: Number(e.target.value) } : item))} type="number" min={0} placeholder="Sort order" className="h-10 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                                                    </div>
+                                                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                                                        <label className="flex items-center gap-2 text-sm text-slate-700">
+                                                            <input checked={!!testimonial.isFeatured} onChange={(e) => setTestimonials((items) => items.map((item) => item.id === testimonial.id ? { ...item, isFeatured: e.target.checked } : item))} type="checkbox" />
+                                                            Featured testimonial
+                                                        </label>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            <Button type="button" disabled={savingTestimonial} onClick={() => saveTestimonial(testimonial)} className="h-10 rounded-xl bg-blue-700 text-sm text-white hover:bg-blue-800">
+                                                                <Save className="mr-2 h-4 w-4" />
+                                                                Save
+                                                            </Button>
+                                                            <Button type="button" variant="outline" onClick={() => deleteTestimonial(testimonial.id)} className="h-10 rounded-xl border-red-200 text-sm text-red-600 hover:bg-red-50">
+                                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                                Delete
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : null}
+
+                                    {metrics.length > 0 ? (
+                                        <div className="grid gap-3">
+                                            {metrics.map((metric) => (
+                                                <div key={metric.id ?? metric.label} className="rounded-2xl border border-slate-200 bg-white p-4">
+                                                    <div className="grid gap-3 md:grid-cols-2">
+                                                        <input value={metric.value} onChange={(e) => setMetrics((items) => items.map((item) => item.id === metric.id ? { ...item, value: e.target.value } : item))} placeholder="Metric value" className="h-10 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                                                        <input value={metric.label} onChange={(e) => setMetrics((items) => items.map((item) => item.id === metric.id ? { ...item, label: e.target.value } : item))} placeholder="Metric label" className="h-10 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                                                        <textarea value={metric.description ?? ""} onChange={(e) => setMetrics((items) => items.map((item) => item.id === metric.id ? { ...item, description: e.target.value } : item))} rows={3} placeholder="Optional description" className="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:col-span-2" />
+                                                        <input value={metric.sortOrder ?? 0} onChange={(e) => setMetrics((items) => items.map((item) => item.id === metric.id ? { ...item, sortOrder: Number(e.target.value) } : item))} type="number" min={0} placeholder="Sort order" className="h-10 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                                                    </div>
+                                                    <div className="mt-3 flex flex-wrap justify-end gap-2">
+                                                        <Button type="button" disabled={savingMetric} onClick={() => saveMetric(metric)} className="h-10 rounded-xl bg-blue-700 text-sm text-white hover:bg-blue-800">
+                                                            <Save className="mr-2 h-4 w-4" />
+                                                            Save
+                                                        </Button>
+                                                        <Button type="button" variant="outline" onClick={() => deleteMetric(metric.id)} className="h-10 rounded-xl border-red-200 text-sm text-red-600 hover:bg-red-50">
+                                                            <Trash2 className="mr-2 h-4 w-4" />
+                                                            Delete
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : null}
                                 </CardContent>
                             </FormCard>
                         </section>
