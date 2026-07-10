@@ -14,10 +14,13 @@ import MarketingCard from '@/components/explorer/MarketingCard';
 import { ProjectActions } from "@/components/projects/ProjectActions ";
 import MarkdownPreviewCard from "@/components/markdown/MarkdownPreviewCard"; // you already use uiw md preview
 import ProjectRightRail from '@/components/recommendations/ProjectRightRail';
+import ProjectDiscoveryBand from "@/components/recommendations/ProjectDiscoveryBand";
+import { getSimilarProjects, type ProjectRec } from "@/services/recommendations";
 
 import ProjectHero from '@/components/projects/ProjectHero';
 import ProjectOpenForChips from "@/components/projects/ProjectOpenForChips";
 import { normalizeProjectOpenFor } from "@/lib/project-open-for";
+import ProjectCoverFallback from "@/components/projects/ProjectCoverFallback";
 
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -454,12 +457,28 @@ const canRequestCollaboration =
     ["active", "beta", "launched", "in_development"].includes(collaborationStatus) ||
     !!(contactEmail || contactPhone || website);
 const [stats, setStats] = useState<{ visits: number; siteClicks: number; social: { platform: string; count: number }[] } | null>(null);
+const [similarProjects, setSimilarProjects] = useState<ProjectRec[]>([]);
 
 useEffect(() => {
     (async () => {
         const r = await fetch(`${API_BASE}/projects/${project.id}/stats`, { credentials: "include" });
         if (r.ok) setStats(await r.json());
     })();
+}, [project.id]);
+
+useEffect(() => {
+    let cancelled = false;
+    (async () => {
+        try {
+            const items = await getSimilarProjects(project.id, { limit: 4 });
+            if (!cancelled) setSimilarProjects(items ?? []);
+        } catch {
+            if (!cancelled) setSimilarProjects([]);
+        }
+    })();
+    return () => {
+        cancelled = true;
+    };
 }, [project.id]);
 
 useEffect(() => {
@@ -913,8 +932,16 @@ useEffect(() => {
 
                   {creatorProjects.length > 0 ? (
                       <LandingSection icon={<FolderKanban className="h-5 w-5" />} title={`Other Projects by ${creatorName}`} subtitle="More work from the same creator or business profile.">
-                          <div className="grid gap-3 sm:grid-cols-2">{creatorProjects.map((item) => <Link key={item.id} href={`/projects/${item.id}`} className="group flex min-w-0 gap-3 rounded-2xl border border-blue-100 bg-gradient-to-br from-white to-blue-50/50 p-3 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-sm hover:shadow-blue-950/10">{item.coverImageUrl ? <img src={item.coverImageUrl} alt="" className="h-16 w-20 shrink-0 rounded-xl object-cover" /> : <div className="flex h-16 w-20 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700"><FolderKanban className="h-5 w-5" /></div>}<div className="min-w-0"><h3 className="truncate text-sm font-semibold text-slate-950 group-hover:text-blue-700">{item.title}</h3>{item.category ? <p className="mt-1 truncate text-xs font-medium text-slate-500">{item.category}</p> : null}{item.bio ? <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-600">{item.bio}</p> : null}</div></Link>)}</div>
+                          <div className="grid gap-3 sm:grid-cols-2">{creatorProjects.map((item) => <Link key={item.id} href={`/projects/${item.id}`} className="group flex min-w-0 gap-3 rounded-2xl border border-blue-100 bg-gradient-to-br from-white to-blue-50/50 p-3 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-sm hover:shadow-blue-950/10">{item.coverImageUrl ? <img src={item.coverImageUrl} alt="" className="h-16 w-20 shrink-0 rounded-xl object-cover" /> : <div className="h-16 w-20 shrink-0 overflow-hidden rounded-xl ring-1 ring-blue-100"><ProjectCoverFallback title={item.title} category={item.category} variant="thumbnail" /></div>}<div className="min-w-0"><h3 className="truncate text-sm font-semibold text-slate-950 group-hover:text-blue-700">{item.title}</h3>{item.category ? <p className="mt-1 truncate text-xs font-medium text-slate-500">{item.category}</p> : null}{item.bio ? <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-600">{item.bio}</p> : null}</div></Link>)}</div>
                       </LandingSection>
+                  ) : null}
+
+                  {similarProjects.length > 0 ? (
+                      <ProjectDiscoveryBand
+                          title="Similar Projects"
+                          items={similarProjects}
+                          badge="Similar"
+                      />
                   ) : null}
 
                   <LandingSection icon={<MessageCircleMore className="h-5 w-5" />} title="Contact" subtitle="Reach out directly about this project or business." className="bg-gradient-to-tr from-blue-50 via-white to-cyan-50/50">

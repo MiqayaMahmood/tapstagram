@@ -14,10 +14,17 @@ import FiltersCard from "@/components/explorer/FiltersCard";
 import MyQuickLinks from "@/components/MyQuickLinks";
 import Features_OrderCards, { Partner } from "@/components/explorer/Features_OrderCards";
 import ProjectCard from "@/components/projects/ProjectCard";
+import ProjectDiscoveryBand from "@/components/recommendations/ProjectDiscoveryBand";
 import { Separator } from '@/components/ui/Separator';
 import PremiumPresentationCard from '@/components/presentation/PremiumPresentationCard';
 import UserMiniCard from '@/components/explorer/UserMiniCard';
 import { Building2, Search, SlidersHorizontal, UsersRound, X } from "lucide-react";
+import {
+    getPopularProjectsInCategory,
+    getRecentlyActiveProjects,
+    getTrendingProjects,
+    type ProjectRec,
+} from "@/services/recommendations";
 
 const CATEGORY_OPTIONS = [
     { v: "", l: "All categories" },
@@ -41,6 +48,10 @@ const CATEGORY_OPTIONS = [
     { v: "TRADING", l: "Trading" },
     { v: "OTHER", l: "Other" },
 ];
+
+function categoryLabel(value: string) {
+    return CATEGORY_OPTIONS.find((item) => item.v === value)?.l ?? value;
+}
 function SortChip({
     label,
     active,
@@ -124,6 +135,9 @@ export default function ExplorePage() {
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+    const [trendingProjects, setTrendingProjects] = useState<ProjectRec[]>([]);
+    const [popularCategoryProjects, setPopularCategoryProjects] = useState<ProjectRec[]>([]);
+    const [recentlyActiveProjects, setRecentlyActiveProjects] = useState<ProjectRec[]>([]);
 
     const [me, setMe] = useState<{
         id: number; userId: number; username: string | null;
@@ -206,6 +220,40 @@ export default function ExplorePage() {
         parsed.tags.join(","), parsed.sortP, parsed.category, parsed.country,
         parsed.sortJ, parsed.page, parsed.pageSize, me?.id
     ]);
+
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            if (mode !== "business") {
+                setTrendingProjects([]);
+                setPopularCategoryProjects([]);
+                setRecentlyActiveProjects([]);
+                return;
+            }
+
+            try {
+                const [trending, recent, popular] = await Promise.all([
+                    getTrendingProjects({ limit: 6, days: 30, category: parsed.category || undefined }),
+                    getRecentlyActiveProjects({ limit: 6, category: parsed.category || undefined }),
+                    parsed.category
+                        ? getPopularProjectsInCategory({ category: parsed.category, limit: 6 })
+                        : Promise.resolve([]),
+                ]);
+                if (!cancelled) {
+                    setTrendingProjects(trending ?? []);
+                    setRecentlyActiveProjects(recent ?? []);
+                    setPopularCategoryProjects(popular ?? []);
+                }
+            } catch {
+                if (!cancelled) {
+                    setTrendingProjects([]);
+                    setPopularCategoryProjects([]);
+                    setRecentlyActiveProjects([]);
+                }
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [mode, parsed.category]);
 
     const pushQS = (updates: Record<string, string | number | undefined | null>) => {
         const qs = new URLSearchParams(sp.toString());
@@ -471,6 +519,28 @@ export default function ExplorePage() {
                                     <ProjectCard key={p.id} project={p} plan={me?.plan || 'free'} />
                                 ))}
                             </ul>
+                            <div className="space-y-3">
+                                {parsed.category ? (
+                                    <ProjectDiscoveryBand
+                                        title={`Popular in ${categoryLabel(parsed.category)}`}
+                                        items={popularCategoryProjects}
+                                        badge="Popular"
+                                        compact
+                                    />
+                                ) : null}
+                                <ProjectDiscoveryBand
+                                    title="Trending Projects"
+                                    items={trendingProjects}
+                                    badge="Trending"
+                                    compact
+                                />
+                                <ProjectDiscoveryBand
+                                    title="Recently Active"
+                                    items={recentlyActiveProjects}
+                                    badge="Updated recently"
+                                    compact
+                                />
+                            </div>
                             <Pager canPrev={canPrev} canNext={canNext} page={parsed.page} goPage={goPage} pageSize={parsed.pageSize} />
                         </>
                     )}

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { ProjectRec } from "@/services/recommendations";
+import ProjectCoverFallback from "@/components/projects/ProjectCoverFallback";
 
 export default function TrendingProjectsCard({
     items,
@@ -13,10 +14,11 @@ export default function TrendingProjectsCard({
     if (!items?.length) return null;
 
     return (
-        <div className="rounded-xl border border-zinc-400 bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm shadow-blue-950/5">
+            <div className="-mx-4 -mt-4 mb-4 h-1 rounded-t-2xl bg-gradient-to-r from-slate-900 via-blue-700 to-emerald-400" />
             <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-zinc-900">{title}</h3>
-                <span className="rounded-full bg-orange-50 px-2 py-1 text-[10px] font-medium text-orange-600">
+                <span className="rounded-full bg-blue-50 px-2 py-1 text-[10px] font-medium text-blue-700">
                     Trending
                 </span>
             </div>
@@ -28,10 +30,12 @@ export default function TrendingProjectsCard({
                         href={`/projects/${item.id}`}
                         className="flex gap-3 rounded-2xl p-2 transition hover:bg-zinc-50"
                     >
-                        <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-zinc-100">
+                        <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl ring-1 ring-blue-100">
                             {item.coverImageUrl ? (
                                 <img src={item.coverImageUrl} alt={item.title} className="h-full w-full object-cover" />
-                            ) : null}
+                            ) : (
+                                <ProjectCoverFallback title={item.title} category={item.category} variant="tiny" />
+                            )}
                         </div>
                         <div className="min-w-0">
                             <div className="truncate text-sm font-medium text-zinc-900">{item.title}</div>

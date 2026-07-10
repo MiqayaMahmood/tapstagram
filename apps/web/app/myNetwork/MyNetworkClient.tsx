@@ -13,6 +13,7 @@ import ProfileRightRail from '@/components/recommendations/ProfileRightRail';
 import UserMiniCard from '@/components/explorer/UserMiniCard';
 import CollapsibleNetworkSection from '@/components/network/CollapsibleNetworkSection';
 import { toast } from 'sonner';
+import ProjectCoverFallback from '@/components/projects/ProjectCoverFallback';
 
 
 
@@ -197,13 +198,13 @@ function ProjectMiniCard({ item }: any) {
     return (
         <Link
             href={`/projects/${item.id}`}
-            className="flex gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/40 p-3 shadow-sm shadow-emerald-950/5 transition hover:-translate-y-0.5 hover:bg-white"
+            className="flex gap-3 rounded-2xl border border-blue-100 bg-blue-50/40 p-3 shadow-sm shadow-blue-950/5 transition hover:-translate-y-0.5 hover:bg-white"
         >
-            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-emerald-50 ring-1 ring-emerald-100">
+            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl ring-1 ring-blue-100">
                 {item.coverImageUrl ? (
                     <img src={item.coverImageUrl} alt={item.title} className="h-full w-full object-cover" />
                 ) : (
-                    <div className="h-full w-full bg-gradient-to-br from-slate-900 via-blue-700 to-emerald-400" />
+                    <ProjectCoverFallback title={item.title} category={item.category} variant="tiny" />
                 )}
             </div>
 

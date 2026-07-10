@@ -5,8 +5,8 @@ import { ExternalLink, ArrowLeft, CalendarDays, CheckCircle, MapPin, Mail, Phone
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import DynamicHeroBanner from "@/components/DynamicHeroBanner";
 import ProjectStatusBadge from "@/components/projects/ProjectStatusBadge";
+import ProjectCoverFallback from "@/components/projects/ProjectCoverFallback";
 
 type P = {
     id: number;
@@ -61,7 +61,7 @@ export default function ProjectHero({ project }: { project: P }) {
         <div className="overflow-hidden rounded-3xl border border-blue-100 bg-white/90 shadow-sm shadow-blue-950/5 backdrop-blur">
             <div className="h-1 bg-gradient-to-r from-slate-900 via-blue-700 to-emerald-400" />
             {/* Cover */}
-            <div className="relative h-44 sm:h-56 md:h-72">
+            <div className="relative h-44 sm:h-56 md:h-64">
                 {project.coverImageUrl ? (
                     <img
                         src={project.coverImageUrl}
@@ -69,21 +69,11 @@ export default function ProjectHero({ project }: { project: P }) {
                         className="h-full w-full select-none object-cover"
                     />
                 ) : (
-                        <DynamicHeroBanner
-                            compact
+                        <ProjectCoverFallback
+                            variant="hero"
                             title={project.title}
                             subtitle={project.bio || project.description || "A professional project presentation on Tapstagram."}
                             category={project.category}
-                            industry={project.targetIndustry}
-                            country={project.country}
-                            city={project.city}
-                            email={project.contactEmail}
-                            phone={project.phone}
-                            stats={[
-                                ...(project.followersCount !== undefined ? [{ label: "Followers", value: project.followersCount }] : []),
-                                ...(project.bookmarksCount !== undefined ? [{ label: "Saved", value: project.bookmarksCount }] : []),
-                                ...(project.status ? [{ label: "Status", value: project.status }] : []),
-                            ]}
                         />
                 )}
             </div>

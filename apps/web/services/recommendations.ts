@@ -18,6 +18,13 @@ export type ProjectRec = {
     country: string | null;
     coverImageUrl: string | null;
     bio: string | null;
+    status?: string | null;
+    updatedAt?: string | null;
+    followerCount?: number;
+    bookmarkCount?: number;
+    viewCount?: number;
+    reason?: string;
+    badge?: string;
 };
 
 export type ProfileRecommendationResponse = {
@@ -38,3 +45,43 @@ export const getProfileRecommendations = (profileId: number) =>
 
 export const getProjectRecommendations = (projectId: number) =>
     apiFetch<ProjectRecommendationResponse>(`/recommendations/project/${projectId}`);
+
+function projectRecommendationQuery(params: {
+    limit?: number;
+    days?: number;
+    category?: string;
+    excludeProjectId?: number;
+}) {
+    const qs = new URLSearchParams();
+    if (params.limit) qs.set("limit", String(params.limit));
+    if (params.days) qs.set("days", String(params.days));
+    if (params.category) qs.set("category", params.category);
+    if (params.excludeProjectId) qs.set("excludeProjectId", String(params.excludeProjectId));
+    const suffix = qs.toString();
+    return suffix ? `?${suffix}` : "";
+}
+
+export const getTrendingProjects = (params: {
+    limit?: number;
+    days?: number;
+    category?: string;
+    excludeProjectId?: number;
+} = {}) =>
+    apiFetch<ProjectRec[]>(`/recommendations/projects/trending${projectRecommendationQuery(params)}`);
+
+export const getPopularProjectsInCategory = (params: {
+    category: string;
+    limit?: number;
+    excludeProjectId?: number;
+}) =>
+    apiFetch<ProjectRec[]>(`/recommendations/projects/category${projectRecommendationQuery(params)}`);
+
+export const getRecentlyActiveProjects = (params: {
+    limit?: number;
+    category?: string;
+    excludeProjectId?: number;
+} = {}) =>
+    apiFetch<ProjectRec[]>(`/recommendations/projects/recently-active${projectRecommendationQuery(params)}`);
+
+export const getSimilarProjects = (projectId: number, params: { limit?: number } = {}) =>
+    apiFetch<ProjectRec[]>(`/recommendations/projects/${projectId}/similar${projectRecommendationQuery(params)}`);

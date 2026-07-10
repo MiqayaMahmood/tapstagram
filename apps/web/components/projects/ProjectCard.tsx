@@ -13,9 +13,9 @@ import {
     Users,
     Bookmark,
 } from "lucide-react";
-import  DynamicHeroBanner  from "@/components/DynamicHeroBanner"; 
 import ProjectStatusBadge from "@/components/projects/ProjectStatusBadge";
 import ProjectOpenForChips from "@/components/projects/ProjectOpenForChips";
+import ProjectCoverFallback from "@/components/projects/ProjectCoverFallback";
 
 type ProjectLite = {
     id: number;
@@ -113,23 +113,13 @@ export default function ProjectCard({ project, onFollowChange, plan }: Props) {
                         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
                     </div>
                 ) : (
-                        <DynamicHeroBanner
-                          compact
-                          title={project.title}
-                          subtitle={project.bio || project.description || "A professional project presentation on Tapstagram."}
-                          category={project.category}
-                          industry={project.targetIndustry}
-                          country={project.country}
-                          city={project.city}
-                          email={project.contactEmail}
-                          phone={project.phone}
-                          stats={[
-                            ...(project.followersCount !== undefined ? [{ label: "Followers", value: project.followersCount }] : []),
-                            ...(project.bookmarksCount !== undefined ? [{ label: "Saved", value: project.bookmarksCount }] : []),
-                            ...(project.status ? [{ label: "Status", value: project.status }] : []),
-                          ]}
+                    <div className="h-40 w-full sm:h-52">
+                        <ProjectCoverFallback
+                            title={project.title}
+                            subtitle={project.bio || project.description || "A professional project presentation on Tapstagram."}
+                            category={project.category}
                         />
-                        
+                    </div>
                 )}
             </Link>
 

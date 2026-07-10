@@ -2,13 +2,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/Card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/Separator";
 import { Crown, ArrowRight, ContactRound, ShieldCheck, X, Sparkles, Check, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
+import ProjectCoverFallback from "@/components/projects/ProjectCoverFallback";
 
 // ------------------
 // Helpers
@@ -75,9 +73,9 @@ export function PremiumUpgradeCard({
                 <CardContent className="grid gap-3">
                     <ul className="grid gap-2 text-sm">
                         {[
-                            "Profile Boosting in Explore",
+                            "Featured profile presentation",
                             "Advanced tap & link analytics",
-                            "Verified badge on profile",
+                            "Premium profile tools",
                         ].map((t) => (
                             <li key={t} className="flex items-start gap-2">
                                 <span className="mt-0.5 rounded-full bg-emerald-500/10 p-1 text-emerald-600">
@@ -168,51 +166,102 @@ export function NFCCardOffer({ onOrder }: { onOrder?: () => void }) {
 }
 
 // ------------------
-// Partner Spotlight
+// Featured Businesses
 // ------------------
-export type Partner = { name: string; href: string; logoUrl?: string };
+export type Partner = {
+    name: string;
+    href: string;
+    logoUrl?: string;
+    coverImageUrl?: string;
+    category?: string;
+    country?: string;
+    description?: string;
+    ctaLabel?: string;
+    placementLabel?: "Sponsored" | "Featured";
+};
 
-export function PartnerSpotlight({ partners = [] as Partner[] }: { partners?: Partner[] }) {
+export function SponsoredPlacementBadge({ label = "Featured" }: { label?: "Sponsored" | "Featured" }) {
+    return (
+        <span className="rounded-full border border-blue-100 bg-blue-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-700">
+            {label}
+        </span>
+    );
+}
+
+export function SponsoredBusinessCard({ partner }: { partner: Partner }) {
+    const label = partner.placementLabel ?? "Featured";
+    return (
+        <a
+            href={partner.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex min-w-0 gap-3 rounded-2xl border border-blue-100 bg-white/85 p-3 shadow-sm shadow-blue-950/5 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md hover:shadow-blue-950/10"
+            title={partner.name}
+        >
+            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-blue-100 bg-white">
+                {partner.logoUrl || partner.coverImageUrl ? (
+                    <img
+                        src={partner.logoUrl || partner.coverImageUrl}
+                        alt={partner.name}
+                        className="h-full w-full object-contain p-1"
+                    />
+                ) : (
+                    <ProjectCoverFallback title={partner.name} category={partner.category} variant="tiny" />
+                )}
+            </div>
+            <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 truncate text-sm font-semibold text-slate-950 group-hover:text-blue-700">
+                        {partner.name}
+                    </div>
+                    <SponsoredPlacementBadge label={label} />
+                </div>
+                <div className="mt-1 flex min-w-0 flex-wrap gap-1.5 text-[11px] text-slate-500">
+                    {partner.category ? <span className="truncate">{partner.category}</span> : null}
+                    {partner.country ? <span className="truncate">{partner.country}</span> : null}
+                </div>
+                {partner.description ? (
+                    <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">{partner.description}</p>
+                ) : null}
+                <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-700">
+                    {partner.ctaLabel ?? "View business"}
+                    <ExternalLink className="h-3 w-3" />
+                </span>
+            </div>
+        </a>
+    );
+}
+
+export function FeaturedBusinessesPanel({ partners = [] as Partner[] }: { partners?: Partner[] }) {
     const { dismissed, dismiss } = useDismissableCard("partner-spotlight");
-    const visible = useMemo(() => partners.slice(0, 6), [partners]);
+    const visible = useMemo(() => {
+        const seen = new Set<string>();
+        return partners
+            .filter((partner) => {
+                const key = `${partner.href}:${partner.name}`;
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            })
+            .slice(0, 3);
+    }, [partners]);
     if (dismissed || visible.length === 0) return null;
 
     return (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-            <Card>
+            <Card className="overflow-hidden border-blue-100 shadow-sm shadow-blue-950/5">
+                <div className="h-1 bg-gradient-to-r from-slate-900 via-blue-700 to-emerald-400" />
                 <div className="flex items-center justify-between px-4 pt-4">
                     <div>
-                        <h3 className="text-md font-semibold">Our Trusted Partners</h3>
-                        <p className="text-md text-muted-foreground">Working with leaders across industries</p>
+                        <h3 className="text-sm font-semibold text-slate-950">Featured Businesses</h3>
+                        <p className="mt-1 text-xs leading-5 text-slate-500">Promoted businesses and partners on Tapstagram.</p>
                     </div>
                     
                 </div>
                 <CardContent className="pt-3">
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid gap-3">
                         {visible.map((p) => (
-                            <a
-                                key={p.href + p.name}
-                                href={p.href}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="group flex items-center justify-center rounded-xl border bg-white/60 p-2 transition hover:shadow-sm"
-                                title={p.name}
-                            >
-                                {p.logoUrl ? (
-                                    // Next/Image is optional here; using it improves perf if domains are allowed
-                                    <Image
-                                        src={p.logoUrl}
-                                        alt={p.name}
-                                        width={144}
-                                        height={48}
-                                        className="max-h-48 transition group-hover:opacity-100 group-hover:grayscale-0"
-                                    />
-                                ) : (
-                                    <span className="text-md font-medium transition group-hover:opacity-100">
-                                        {p.name}
-                                    </span>
-                                )}
-                            </a>
+                            <SponsoredBusinessCard key={p.href + p.name} partner={p} />
                         ))}
                     </div>
                 </CardContent>
@@ -220,11 +269,56 @@ export function PartnerSpotlight({ partners = [] as Partner[] }: { partners?: Pa
                     <a
                         href="/contact"
                         className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-                        title="Become a partner"
+                        title="Become a featured business"
                     >
-                        Become a partner
+                        Become a featured business
                         <ExternalLink className="h-3.5 w-3.5" />
                     </a>
+                </CardFooter>
+            </Card>
+        </motion.div>
+    );
+}
+
+export const PartnerSpotlight = FeaturedBusinessesPanel;
+
+export function PromotionOfferCard() {
+    const packages = [
+        ["Featured Business", "Featured business listing", "Sponsored badge", "Explore sidebar placement"],
+        ["Business Plus", "Category targeting", "Related-business placement", "Basic impressions and click statistics"],
+        ["Premium Promotion", "Main Explore placement", "Business detail-page placement", "Country/category targeting", "Enhanced analytics"],
+    ];
+
+    return (
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+            <Card className="overflow-hidden border-blue-100 bg-white shadow-sm shadow-blue-950/5">
+                <div className="h-1 bg-gradient-to-r from-slate-900 via-blue-700 to-emerald-400" />
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-base text-slate-950">Promote your business</CardTitle>
+                    <CardDescription>Reach more visitors with featured placement on Tapstagram.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-3">
+                    {packages.map(([title, ...items]) => (
+                        <div key={title} className="rounded-2xl border border-blue-100 bg-blue-50/40 p-3">
+                            <div className="text-sm font-semibold text-slate-950">{title}</div>
+                            <ul className="mt-2 grid gap-1 text-xs leading-5 text-slate-600">
+                                {items.map((item) => (
+                                    <li key={item} className="flex gap-1.5">
+                                        <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-blue-700" />
+                                        <span>{item}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
+                </CardContent>
+                <CardFooter className="grid gap-2">
+                    <Button asChild size="sm" className="w-full">
+                        <a href="/contact">View promotion options</a>
+                    </Button>
+                    <Button asChild size="sm" variant="outline" className="w-full">
+                        <a href="/contact">Become a featured business</a>
+                    </Button>
                 </CardFooter>
             </Card>
         </motion.div>
@@ -249,7 +343,8 @@ export default function Features_OrderCards({
 }) {
     return (
         <div className="grid gap-4">
-            <PartnerSpotlight partners={partners} />
+            <FeaturedBusinessesPanel partners={partners} />
+            <PromotionOfferCard />
             <PremiumUpgradeCard isPremium={isPremium} onUpgrade={onUpgrade} onManage={onManage} />
             <NFCCardOffer onOrder={onOrderCard} />
             
