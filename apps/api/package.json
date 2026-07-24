@@ -2,6 +2,9 @@
   "name": "tapstagram-api",
   "version": "1.0.0",
   "main": "server.ts",
+  "prisma": {
+    "schema": "prisma/schema.prisma"
+  },
   "scripts": {
     "dev": "nodemon --exec ts-node server.ts",
     "build": "tsc",
